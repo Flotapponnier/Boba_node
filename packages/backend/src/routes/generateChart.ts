@@ -2,6 +2,7 @@ import { Router } from 'express';
 import archiver from 'archiver';
 import { BscConfigSchema } from '../types/bscConfig';
 import { EthConfigSchema } from '../types/ethConfig';
+import { ArbConfigSchema, DEFAULT_ARB_CONFIG } from '../types/arbConfig';
 import {
   generateChartYaml as generateBscChartYaml,
   generateValuesYaml as generateBscValuesYaml,
@@ -16,6 +17,7 @@ import {
   generateEthServiceYaml,
   generateEthConfigMapYaml,
 } from '../generators/ethChartGenerator';
+import { generateArbHelmChart } from '../generators/arbChartGenerator';
 import {
   generateServiceMonitorYaml,
   generatePrometheusRuleYaml,
@@ -331,4 +333,66 @@ generateChartRouter.get('/defaults/eth', (req, res) => {
   };
 
   res.json(defaults);
+});
+
+// Arbitrum chart generation
+generateChartRouter.post('/generate/arb', async (req, res) => {
+  try {
+    const config = ArbConfigSchema.parse(req.body);
+    const deploymentName = config.deploymentName;
+
+    res.setHeader('Content-Type', 'application/gzip');
+    res.setHeader('Content-Disposition', `attachment; filename="arbitrum-node-${deploymentName}.tgz"`);
+
+    const archive = archiver('tar', {
+      gzip: true,
+      gzipOptions: { level: 9 },
+    });
+
+    archive.on('error', (err) => {
+      throw err;
+    });
+
+    archive.pipe(res);
+
+    const chartName = 'arbitrum-node';
+    const files = generateArbHelmChart(config);
+
+    for (const [filePath, content] of Object.entries(files)) {
+      archive.append(content, { name: `${chartName}/${filePath}` });
+    }
+
+    await archive.finalize();
+  } catch (error) {
+    console.error('Error generating Arbitrum chart:', error);
+
+    if (error instanceof Error && 'issues' in error) {
+      res.status(400).json({
+        error: 'Invalid configuration',
+        details: error
+      });
+    } else {
+      res.status(500).json({
+        error: 'Failed to generate chart',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+});
+
+// Endpoint to get Arbitrum node type presets
+generateChartRouter.get('/presets/arb/:nodeType', (req, res) => {
+  const { ARB_NODE_PRESETS } = require('../presets/arbPresets');
+  const nodeType = req.params.nodeType;
+
+  if (!ARB_NODE_PRESETS[nodeType]) {
+    return res.status(404).json({ error: 'Node type not found' });
+  }
+
+  res.json(ARB_NODE_PRESETS[nodeType]);
+});
+
+// Endpoint to get default Arbitrum config
+generateChartRouter.get('/defaults/arb', (req, res) => {
+  res.json(DEFAULT_ARB_CONFIG);
 });

@@ -49,7 +49,7 @@ export const EthNodeConfigSchema = z.object({
 
 // Full Ethereum configuration combining base and chain-specific
 export const EthConfigSchema = BaseChainConfigSchema.extend({
-  nodeType: z.enum(['light', 'fast', 'full', 'archive', 'validator']).default('full'),
+  nodeType: z.enum(['light', 'full', 'archive', 'validator']).default('full'),
   config: EthNodeConfigSchema,
 
   // Validator-specific config (optional)

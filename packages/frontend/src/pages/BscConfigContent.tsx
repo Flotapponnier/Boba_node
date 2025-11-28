@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import HelpTooltip from '../components/HelpTooltip';
 import '../styles/common.css';
 
 interface BscConfig {
@@ -201,6 +202,16 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
       <div className="config-page-header">
         <h1>BSC {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
         <p>Configure your Binance Smart Chain {config.nodeType} node parameters</p>
+        <div className="doc-link-container">
+          <a
+            href="https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="doc-link"
+          >
+            Official BSC Node Documentation
+          </a>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -212,7 +223,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           <h2>Basic Configuration</h2>
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>Deployment Name *</label>
+              <label>
+                Deployment Name *
+                <HelpTooltip content="Unique identifier for this deployment. Used in Helm chart naming and Kubernetes resources. Must be lowercase alphanumeric with hyphens only." />
+              </label>
               <input
                 type="text"
                 value={config.deploymentName}
@@ -223,7 +237,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               <span className="help-text">Must be lowercase alphanumeric with hyphens</span>
             </div>
             <div className="form-group">
-              <label>Node Name</label>
+              <label>
+                Node Name
+                <HelpTooltip content="Human-readable name for your BSC node. This will be used in labels and service discovery." />
+              </label>
               <input
                 type="text"
                 value={config.nodeName}
@@ -231,7 +248,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Kubernetes Namespace</label>
+              <label>
+                Kubernetes Namespace
+                <HelpTooltip content="The Kubernetes namespace where the node will be deployed. Namespaces help organize resources in your cluster." />
+              </label>
               <input
                 type="text"
                 value={config.namespace}

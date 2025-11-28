@@ -7,6 +7,7 @@ import arbitrumImage from '../assets/boba_node_arbitrum.png';
 import NodeTypeModal from '../components/NodeTypeModal';
 import BscConfigContent from './BscConfigContent';
 import EthConfigContent from './EthConfigContent';
+import ArbConfigContent from './ArbConfigContent';
 import './HomePage.css';
 
 interface NodeCard {
@@ -28,16 +29,16 @@ const nodes: NodeCard[] = [
   {
     id: 'ethereum',
     name: 'Ethereum Node',
-    description: 'Light, Fast, Full, Archive, Validator',
+    description: 'Light, Full, Archive, Validator',
     image: ethereumImage,
     available: true,
   },
   {
     id: 'arbitrum',
     name: 'Arbitrum Node',
-    description: 'Coming soon',
+    description: 'Full, Archive, Validator',
     image: arbitrumImage,
-    available: false,
+    available: true,
   },
 ];
 
@@ -45,7 +46,7 @@ export default function NewHomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(false);
 
-  const chain = searchParams.get('chain') as 'bsc' | 'ethereum' | null;
+  const chain = searchParams.get('chain') as 'bsc' | 'ethereum' | 'arbitrum' | null;
   const nodeType = searchParams.get('nodeType');
 
   // Initialize modal state based on URL
@@ -87,6 +88,7 @@ export default function NewHomePage() {
         <main className="main-content">
           {chain === 'bsc' && <BscConfigContent nodeType={nodeType} />}
           {chain === 'ethereum' && <EthConfigContent nodeType={nodeType} />}
+          {chain === 'arbitrum' && <ArbConfigContent nodeType={nodeType} />}
         </main>
 
         <footer className="footer">

@@ -36,40 +36,6 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     },
   },
 
-  fast: {
-    description: 'Fast node - optimized for RPC, recent state only',
-    config: {
-      syncMode: 'snap',
-      gcMode: 'full',
-      stateScheme: 'path',
-      cache: 8192, // 8GB
-      snapshot: true,
-      historyState: 90000, // ~128 blocks
-      historyTransactions: 2350000,
-      metricsEnabled: true,
-      httpApi: 'eth,net,web3',
-      wsApi: 'eth,net,web3',
-      txpool: {
-        accountslots: 16,
-        globalslots: 5120,
-        accountqueue: 64,
-        globalqueue: 1024,
-        lifetime: '3h0m0s',
-      },
-    },
-    resources: {
-      requests: {
-        cpu: '8',
-        memory: '32Gi',
-      },
-    },
-    persistence: {
-      enabled: true,
-      storageClass: 'local-path',
-      size: '1.5Ti',
-    },
-  },
-
   full: {
     description: 'Full node - complete validation, recent state + full chain',
     config: {

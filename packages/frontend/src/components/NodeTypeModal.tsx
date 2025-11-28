@@ -13,7 +13,7 @@ interface NodeTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (nodeType: string) => void;
-  chain: 'bsc' | 'eth' | 'ethereum';
+  chain: 'bsc' | 'eth' | 'ethereum' | 'arbitrum';
 }
 
 const BSC_NODE_TYPES: NodeTypeOption[] = [
@@ -47,39 +47,61 @@ const ETH_NODE_TYPES: NodeTypeOption[] = [
   {
     type: 'light',
     title: 'Light Node',
-    description: 'Minimal storage, fast sync, limited queries.',
+    description: 'Downloads headers only, minimal storage.',
     specs: '2 cores | 4GB RAM | 100GB SSD'
-  },
-  {
-    type: 'fast',
-    title: 'Fast Node',
-    description: 'Optimized for RPC queries, recent state only.',
-    specs: '8 cores | 32GB RAM | 1.5TB SSD'
   },
   {
     type: 'full',
     title: 'Full Node',
-    description: 'Complete validation, recent state + full chain.',
+    description: 'Complete validation, keeps recent ~128 blocks state.',
     specs: '16 cores | 64GB RAM | 2TB SSD'
   },
   {
     type: 'archive',
     title: 'Archive Node',
-    description: 'Full historical state, all queries supported.',
+    description: 'Full historical state from genesis (~18-20TB).',
     specs: '32 cores | 128GB RAM | 20TB SSD'
   },
   {
     type: 'validator',
     title: 'Validator Node',
-    description: 'Staking node with consensus client.',
+    description: 'Staking node with consensus client (PoS).',
     specs: '16 cores | 64GB RAM | 2TB SSD'
+  }
+];
+
+const ARB_NODE_TYPES: NodeTypeOption[] = [
+  {
+    type: 'full',
+    title: 'Full Node',
+    description: 'Pruned full node, keeps recent state.',
+    specs: '4 cores | 16GB RAM | 2TB SSD'
+  },
+  {
+    type: 'archive',
+    title: 'Archive Node',
+    description: 'Complete historical data (9.7TB for Arbitrum One).',
+    specs: '8 cores | 32GB RAM | 12TB SSD'
+  },
+  {
+    type: 'validator',
+    title: 'Validator Node',
+    description: 'Validator node with watchtower capabilities.',
+    specs: '8 cores | 24GB RAM | 3TB SSD'
   }
 ];
 
 export default function NodeTypeModal({ isOpen, onClose, onSelect, chain }: NodeTypeModalProps) {
   const [selectedType, setSelectedType] = useState<string>('');
-  const nodeTypes = chain === 'bsc' ? BSC_NODE_TYPES : ETH_NODE_TYPES;
-  const displayChain = chain === 'ethereum' ? 'ETH' : chain.toUpperCase();
+
+  let nodeTypes = BSC_NODE_TYPES;
+  if (chain === 'ethereum' || chain === 'eth') {
+    nodeTypes = ETH_NODE_TYPES;
+  } else if (chain === 'arbitrum') {
+    nodeTypes = ARB_NODE_TYPES;
+  }
+
+  const displayChain = chain === 'ethereum' ? 'ETH' : chain === 'arbitrum' ? 'ARBITRUM' : chain.toUpperCase();
 
   if (!isOpen) return null;
 
