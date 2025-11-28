@@ -136,31 +136,6 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
       });
   }, [nodeType]);
 
-  const loadNodeTypePreset = async (nodeType: string) => {
-    try {
-      const response = await fetch(`/api/presets/bsc/${nodeType}`);
-      const preset = await response.json();
-
-      if (config) {
-        setConfig({
-          ...config,
-          nodeType: preset.nodeType,
-          config: {
-            ...config.config,
-            ...preset.config,
-          },
-          resources: preset.resources,
-          persistence: {
-            ...config.persistence,
-            size: preset.persistence.size,
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load preset:', error);
-    }
-  };
-
   const handleChange = (path: string, value: any) => {
     if (!config) return;
 
@@ -232,39 +207,6 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
       {success && <div className="success-message">{success}</div>}
 
       <form onSubmit={(e) => { e.preventDefault(); handleGenerate(); }}>
-        {/* Node Type Selection */}
-        <div className="config-section">
-          <h2>Node Type</h2>
-          <div className="node-type-selector">
-            {(['fast', 'full', 'archive', 'validator'] as const).map((type) => (
-              <div
-                key={type}
-                className={`node-type-card ${config.nodeType === type ? 'selected' : ''}`}
-                onClick={() => {
-                  handleChange('nodeType', type);
-                  loadNodeTypePreset(type);
-                }}
-              >
-                <h3>{type.charAt(0).toUpperCase() + type.slice(1)} Node</h3>
-                <p>
-                  {type === 'fast' && 'High performance RPC node. Best for serving requests.'}
-                  {type === 'full' && 'Complete node with recent state. Balanced performance.'}
-                  {type === 'archive' && 'Full historical data. For historical queries.'}
-                  {type === 'validator' && 'Block validation. Requires BNB stake.'}
-                </p>
-                <div className="node-type-specs">
-                  <small>
-                    {type === 'fast' && '16 cores | 32GB RAM | 2TB SSD'}
-                    {type === 'full' && '16 cores | 64GB RAM | 3TB SSD'}
-                    {type === 'archive' && '32 cores | 128GB RAM | 10TB SSD'}
-                    {type === 'validator' && '16 cores | 64GB RAM | 3TB SSD'}
-                  </small>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Basic Configuration */}
         <div className="config-section">
           <h2>Basic Configuration</h2>

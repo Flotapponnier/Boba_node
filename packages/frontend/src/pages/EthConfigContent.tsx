@@ -45,28 +45,6 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
       });
   }, [nodeType]);
 
-  // Load preset when node type changes
-  const loadNodeTypePreset = async (nodeType: EthNodeType) => {
-    try {
-      const response = await fetch(`/api/presets/eth/${nodeType}`);
-      const preset = await response.json();
-
-      setConfig(prev => ({
-        ...prev,
-        nodeType,
-        config: { ...prev.config, ...preset.config },
-        resources: preset.resources,
-        persistence: preset.persistence,
-      }));
-    } catch (err) {
-      console.error('Failed to load preset:', err);
-    }
-  };
-
-  const handleNodeTypeSelect = (nodeType: EthNodeType) => {
-    loadNodeTypePreset(nodeType);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -120,48 +98,6 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
       {success && <div className="success-message">{success}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Node Type Selection */}
-        <div className="config-section">
-          <h2>Node Type</h2>
-          <div className="node-type-selector">
-            <div
-              className={`node-type-card ${config.nodeType === 'light' ? 'selected' : ''}`}
-              onClick={() => handleNodeTypeSelect('light')}
-            >
-              <h3>Light</h3>
-              <p>Minimal storage, fast sync</p>
-            </div>
-            <div
-              className={`node-type-card ${config.nodeType === 'fast' ? 'selected' : ''}`}
-              onClick={() => handleNodeTypeSelect('fast')}
-            >
-              <h3>Fast</h3>
-              <p>Optimized for RPC queries</p>
-            </div>
-            <div
-              className={`node-type-card ${config.nodeType === 'full' ? 'selected' : ''}`}
-              onClick={() => handleNodeTypeSelect('full')}
-            >
-              <h3>Full</h3>
-              <p>Complete validation</p>
-            </div>
-            <div
-              className={`node-type-card ${config.nodeType === 'archive' ? 'selected' : ''}`}
-              onClick={() => handleNodeTypeSelect('archive')}
-            >
-              <h3>Archive</h3>
-              <p>Full historical state</p>
-            </div>
-            <div
-              className={`node-type-card ${config.nodeType === 'validator' ? 'selected' : ''}`}
-              onClick={() => handleNodeTypeSelect('validator')}
-            >
-              <h3>Validator</h3>
-              <p>Staking node</p>
-            </div>
-          </div>
-        </div>
-
         {/* Basic Configuration */}
         <div className="config-section">
           <h2>Basic Configuration</h2>
