@@ -197,6 +197,14 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
     );
   }
 
+  // Get documentation URL based on node type
+  const getDocUrl = () => {
+    if (config.nodeType === 'validator') {
+      return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/validator/run-val/';
+    }
+    return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/';
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
@@ -204,12 +212,12 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
         <p>Configure your Binance Smart Chain {config.nodeType} node parameters</p>
         <div className="doc-link-container">
           <a
-            href="https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/"
+            href={getDocUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="doc-link"
           >
-            Official BSC Node Documentation
+            Official BSC {config.nodeType === 'validator' ? 'Validator' : 'Node'} Documentation
           </a>
         </div>
       </div>

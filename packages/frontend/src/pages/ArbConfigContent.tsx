@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArbConfig, DEFAULT_ARB_CONFIG, ArbNodeType } from '../types/arbConfig';
+import HelpTooltip from '../components/HelpTooltip';
 import '../styles/common.css';
 
 interface ArbConfigContentProps {
@@ -87,11 +88,34 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
     return <div className="loading">Loading configuration...</div>;
   }
 
+  // Get documentation URL based on node type
+  const getDocUrl = () => {
+    switch (config.nodeType) {
+      case 'archive':
+        return 'https://docs.arbitrum.io/run-arbitrum-node/more-types/run-archive-node';
+      case 'validator':
+        return 'https://docs.arbitrum.io/run-arbitrum-node/more-types/run-validator-node';
+      case 'full':
+      default:
+        return 'https://docs.arbitrum.io/node-running/how-tos/running-a-full-node';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>Arbitrum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
         <p>Configure and deploy your Arbitrum Nitro node to Kubernetes</p>
+        <div className="doc-link-container">
+          <a
+            href={getDocUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="doc-link"
+          >
+            Official Arbitrum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Documentation
+          </a>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}

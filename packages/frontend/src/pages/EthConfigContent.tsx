@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { EthConfig, DEFAULT_ETH_CONFIG, EthNodeType } from '../types/ethConfig';
+import HelpTooltip from '../components/HelpTooltip';
 import '../styles/common.css';
 
 interface EthConfigContentProps {
@@ -87,11 +88,37 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
     return <div className="loading">Loading configuration...</div>;
   }
 
+  // Get documentation URL based on node type
+  const getDocUrl = () => {
+    switch (config.nodeType) {
+      case 'light':
+        return 'https://ethereum.org/developers/docs/nodes-and-clients/';
+      case 'archive':
+        return 'https://geth.ethereum.org/docs/fundamentals/archive';
+      case 'validator':
+        return 'https://ethereum.org/staking/';
+      case 'fast':
+      case 'full':
+      default:
+        return 'https://geth.ethereum.org/docs/getting-started/hardware-requirements';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>Ethereum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
         <p>Configure and deploy your Ethereum {config.nodeType} node to Kubernetes</p>
+        <div className="doc-link-container">
+          <a
+            href={getDocUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="doc-link"
+          >
+            Official Ethereum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Documentation
+          </a>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
