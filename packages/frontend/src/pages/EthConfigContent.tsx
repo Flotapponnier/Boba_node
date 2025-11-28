@@ -96,14 +96,14 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
   const getDocUrl = () => {
     switch (config.nodeType) {
       case 'light':
-        return 'https://ethereum.org/developers/docs/nodes-and-clients/';
+        return 'https://geth.ethereum.org/docs/fundamentals/light-clients';
       case 'archive':
-        return 'https://geth.ethereum.org/docs/fundamentals/archive';
+        return 'https://geth.ethereum.org/docs/fundamentals/archive-nodes';
       case 'validator':
-        return 'https://ethereum.org/staking/';
+        return 'https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/';
       case 'full':
       default:
-        return 'https://geth.ethereum.org/docs/getting-started/hardware-requirements';
+        return 'https://geth.ethereum.org/docs/getting-started/consensus-clients';
     }
   };
 

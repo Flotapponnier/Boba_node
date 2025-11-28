@@ -204,7 +204,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
   // Get documentation URL based on node type
   const getDocUrl = () => {
     if (config.nodeType === 'validator') {
-      return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/validator/run-val/';
+      return 'https://docs.bnbchain.org/bnb-smart-chain/validator/run-val/';
     }
     return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/';
   };
