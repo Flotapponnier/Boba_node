@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import bannerImage from '../assets/boba_node_banner.png';
 import bscImage from '../assets/boba_node_bsc.png';
 import ethereumImage from '../assets/boba_node_ethereum.png';
@@ -41,29 +42,39 @@ const nodes: NodeCard[] = [
 ];
 
 export default function NewHomePage() {
-  const [selectedChain, setSelectedChain] = useState<'bsc' | 'ethereum' | null>(null);
-  const [selectedNodeType, setSelectedNodeType] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(false);
+
+  const chain = searchParams.get('chain') as 'bsc' | 'ethereum' | null;
+  const nodeType = searchParams.get('nodeType');
+
+  // Initialize modal state based on URL
+  useEffect(() => {
+    if (chain && !nodeType) {
+      setShowModal(true);
+    } else {
+      setShowModal(false);
+    }
+  }, [chain, nodeType]);
 
   const handleNodeClick = (node: NodeCard) => {
     if (node.available) {
-      setSelectedChain(node.id as 'bsc' | 'ethereum');
-      setShowModal(true);
+      setSearchParams({ chain: node.id });
     }
   };
 
-  const handleNodeTypeSelect = (nodeType: string) => {
-    setSelectedNodeType(nodeType);
-    setShowModal(false);
+  const handleNodeTypeSelect = (selectedNodeType: string) => {
+    if (chain) {
+      setSearchParams({ chain, nodeType: selectedNodeType });
+    }
   };
 
   const handleBack = () => {
-    setSelectedChain(null);
-    setSelectedNodeType(null);
+    setSearchParams({});
   };
 
   // Show configuration page if chain and node type are selected
-  if (selectedChain && selectedNodeType) {
+  if (chain && nodeType) {
     return (
       <div className="home-page">
         <header className="header">
@@ -74,8 +85,8 @@ export default function NewHomePage() {
         </header>
 
         <main className="main-content">
-          {selectedChain === 'bsc' && <BscConfigContent nodeType={selectedNodeType} />}
-          {selectedChain === 'ethereum' && <EthConfigContent nodeType={selectedNodeType} />}
+          {chain === 'bsc' && <BscConfigContent nodeType={nodeType} />}
+          {chain === 'ethereum' && <EthConfigContent nodeType={nodeType} />}
         </main>
 
         <footer className="footer">
@@ -127,12 +138,15 @@ export default function NewHomePage() {
         <p>Built with React + TypeScript + Express</p>
       </footer>
 
-      {selectedChain && (
+      {chain && (
         <NodeTypeModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setSearchParams({});
+          }}
           onSelect={handleNodeTypeSelect}
-          chain={selectedChain}
+          chain={chain}
         />
       )}
     </div>

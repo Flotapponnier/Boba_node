@@ -199,8 +199,8 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
   return (
     <div className="config-page-container">
       <div className="config-page-header">
-        <h1>BSC Node Configuration</h1>
-        <p>Configure your Binance Smart Chain node parameters</p>
+        <h1>BSC {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
+        <p>Configure your Binance Smart Chain {config.nodeType} node parameters</p>
       </div>
 
       {error && <div className="error-message">{error}</div>}

@@ -86,7 +86,6 @@ export default function NodeTypeModal({ isOpen, onClose, onSelect, chain }: Node
   const handleSelect = () => {
     if (selectedType) {
       onSelect(selectedType);
-      onClose();
     }
   };
 

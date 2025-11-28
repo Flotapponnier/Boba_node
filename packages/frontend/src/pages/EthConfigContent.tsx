@@ -90,8 +90,8 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
   return (
     <div className="config-page-container">
       <div className="config-page-header">
-        <h1>Ethereum Node Configuration</h1>
-        <p>Configure and deploy your Ethereum Geth node to Kubernetes</p>
+        <h1>Ethereum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
+        <p>Configure and deploy your Ethereum {config.nodeType} node to Kubernetes</p>
       </div>
 
       {error && <div className="error-message">{error}</div>}
