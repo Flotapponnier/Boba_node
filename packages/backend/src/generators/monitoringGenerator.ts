@@ -1,10 +1,11 @@
 export function generateServiceMonitorYaml(): string {
-  return `{{- if .Values.monitoring.enabled }}
+  return `{{- if and .Values.monitoring .Values.monitoring.enabled }}
 {{- if .Values.monitoring.prometheusOperator }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Values.nodeName }}-metrics
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
@@ -15,8 +16,8 @@ spec:
       app: {{ .Values.nodeName }}
   endpoints:
   - port: metrics
-    interval: {{ .Values.monitoring.serviceMonitor.interval | default "30s" }}
-    scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout | default "10s" }}
+    interval: {{ if .Values.monitoring.serviceMonitor }}{{ .Values.monitoring.serviceMonitor.interval | default "30s" }}{{ else }}"30s"{{ end }}
+    scrapeTimeout: {{ if .Values.monitoring.serviceMonitor }}{{ .Values.monitoring.serviceMonitor.scrapeTimeout | default "10s" }}{{ else }}"10s"{{ end }}
     path: /debug/metrics/prometheus
 {{- end }}
 {{- end }}
@@ -24,12 +25,13 @@ spec:
 }
 
 export function generatePrometheusRuleYaml(): string {
-  return `{{- if .Values.monitoring.enabled }}
+  return `{{- if and .Values.monitoring .Values.monitoring.enabled }}
 {{- if .Values.monitoring.prometheusOperator }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: {{ .Values.nodeName }}-alerts
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
@@ -185,19 +187,24 @@ export function generateGrafanaDashboardConfigMap(): string {
     version: 0
   };
 
-  return `{{- if .Values.monitoring.enabled }}
+  // Escape Grafana template variables for Helm
+  const dashboardJson = JSON.stringify(dashboard, null, 4)
+    .replace(/\{\{method\}\}/g, '{{ "{{method}}" }}');
+
+  return `{{- if and .Values.monitoring .Values.monitoring.enabled }}
 {{- if .Values.monitoring.grafanaDashboard }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.nodeName }}-grafana-dashboard
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
     grafana_dashboard: "1"
 data:
   bsc-node-dashboard.json: |
-${JSON.stringify(dashboard, null, 4).split('\n').map(line => '    ' + line).join('\n')}
+${dashboardJson.split('\n').map(line => '    ' + line).join('\n')}
 {{- end }}
 {{- end }}
 `;

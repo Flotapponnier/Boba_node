@@ -54,7 +54,6 @@ function HomePage() {
     <div className="home-page">
       <header className="header">
         <img src={bannerImage} alt="Boba Node" className="banner" />
-        <h1>Boba Node</h1>
         <p className="subtitle">
           Generate production-ready Helm charts for blockchain nodes
         </p>

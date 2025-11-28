@@ -5,6 +5,7 @@ export const BscConfigSchema = z.object({
   deploymentName: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Must be lowercase alphanumeric with hyphens'),
   nodeName: z.string().min(1),
   nodeType: z.enum(['fast', 'full', 'archive', 'validator']).default('fast'),
+  namespace: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Must be lowercase alphanumeric with hyphens').default('default'),
 
   // Image
   image: z.object({

@@ -96,6 +96,7 @@ generateChartRouter.get('/defaults/bsc', (req, res) => {
     deploymentName: 'production',
     nodeName: 'bsc-fast-node',
     nodeType: 'fast',
+    namespace: 'default',
     image: {
       repository: 'ghcr.io/bnb-chain/bsc',
       tag: 'v1.4.17',

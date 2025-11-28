@@ -21,6 +21,7 @@ export function generateValuesYaml(config: BscConfig, deploymentName: string): s
     replicaCount: 1,
     nodeType: config.nodeType,
     nodeName: config.nodeName,
+    namespace: config.namespace || 'default',
     image: config.image,
     service: config.service,
     config: config.config,
@@ -58,6 +59,7 @@ export function generateStatefulSetYaml(): string {
 kind: StatefulSet
 metadata:
   name: {{ .Values.nodeName }}
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
@@ -84,7 +86,7 @@ spec:
           type: Unconfined
         {{- end }}
       {{- end }}
-      {{- if .Values.snapshot.enabled }}
+      {{- if and .Values.snapshot .Values.snapshot.enabled }}
       initContainers:
       - name: download-snapshot
         image: busybox:latest
@@ -253,6 +255,7 @@ export function generateServiceYaml(): string {
 kind: Service
 metadata:
   name: {{ .Values.nodeName }}
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
@@ -289,6 +292,7 @@ export function generateConfigMapYaml(): string {
 kind: ConfigMap
 metadata:
   name: {{ .Values.nodeName }}-config
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     app: {{ .Values.nodeName }}
     chain: bsc
@@ -319,9 +323,9 @@ data:
     Rejournal = 3600000000000
     PriceLimit = 1
     PriceBump = 10
-    AccountSlots = 16
+    AccountSlots = {{ .Values.config.txpool.accountslots }}
     GlobalSlots = {{ .Values.config.txpool.globalslots }}
-    AccountQueue = 64
+    AccountQueue = {{ .Values.config.txpool.accountqueue }}
     GlobalQueue = {{ .Values.config.txpool.globalqueue }}
     Lifetime = {{ .Values.config.txpool.lifetime }}
 
@@ -342,8 +346,8 @@ data:
     WSModules = ["{{ .Values.config.wsApi }}"]
 
     [Node.P2P]
-    MaxPeers = 200
-    NoDiscovery = false
+    MaxPeers = {{ if .Values.networking }}{{ .Values.networking.maxPeers | default 200 }}{{ else }}200{{ end }}
+    NoDiscovery = {{ if .Values.networking }}{{ if .Values.networking.nodeDiscovery }}false{{ else }}true{{ end }}{{ else }}false{{ end }}
     ListenAddr = ":{{ .Values.service.ports.p2p.port }}"
     EnableMsgEvents = false
 

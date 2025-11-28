@@ -7,6 +7,7 @@ interface BscConfig {
   deploymentName: string;
   nodeName: string;
   nodeType: 'fast' | 'full' | 'archive' | 'validator';
+  namespace: string;
   image: {
     repository: string;
     tag: string;
@@ -216,6 +217,16 @@ function BscConfigPage() {
                 value={config.nodeName}
                 onChange={(e) => handleChange('nodeName', e.target.value)}
               />
+            </div>
+            <div className="form-group">
+              <label>Kubernetes Namespace</label>
+              <input
+                type="text"
+                value={config.namespace}
+                onChange={(e) => handleChange('namespace', e.target.value)}
+                placeholder="default"
+              />
+              <small>Kubernetes namespace where the node will be deployed</small>
             </div>
           </section>
 
