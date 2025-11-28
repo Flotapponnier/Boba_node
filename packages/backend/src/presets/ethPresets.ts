@@ -10,12 +10,12 @@ export interface EthNodePreset {
 
 export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
   light: {
-    description: 'Light node - minimal storage, fast sync, limited queries',
+    description: 'Light node - minimal storage, downloads only headers',
     config: {
       syncMode: 'light',
       gcMode: 'full',
       stateScheme: 'path',
-      cache: 2048, // 2GB
+      cache: 2048, // 2GB minimum
       snapshot: false,
       historyState: 0,
       historyTransactions: 0,
@@ -25,26 +25,30 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     },
     resources: {
       requests: {
-        cpu: '2',
-        memory: '4Gi',
+        cpu: '2', // Can run on low-power devices
+        memory: '4Gi', // Minimum 4GB
+      },
+      limits: {
+        cpu: '4',
+        memory: '8Gi',
       },
     },
     persistence: {
       enabled: true,
       storageClass: 'local-path',
-      size: '100Gi',
+      size: '100Gi', // Very minimal storage
     },
   },
 
   full: {
-    description: 'Full node - complete validation, recent state + full chain',
+    description: 'Full node - snap sync, recent ~128 blocks state (official minimum: 16GB RAM, 2TB SSD)',
     config: {
-      syncMode: 'snap',
+      syncMode: 'snap', // Recommended sync mode
       gcMode: 'full',
-      stateScheme: 'path',
-      cache: 16384, // 16GB
+      stateScheme: 'path', // Path-based is more efficient
+      cache: 16384, // 16GB recommended for full node
       snapshot: true,
-      historyState: 90000,
+      historyState: 90000, // Recent state (~128 blocks)
       historyTransactions: 2350000,
       metricsEnabled: true,
       httpApi: 'eth,net,web3,debug,txpool',
@@ -59,14 +63,18 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     },
     resources: {
       requests: {
+        cpu: '8', // Official: quad-core minimum, 8 cores recommended
+        memory: '16Gi', // Official: 16GB minimum
+      },
+      limits: {
         cpu: '16',
-        memory: '64Gi',
+        memory: '32Gi',
       },
     },
     persistence: {
       enabled: true,
       storageClass: 'local-path',
-      size: '2Ti',
+      size: '2Ti', // Official: 2TB recommended (grows ~14GB/week)
     },
   },
 

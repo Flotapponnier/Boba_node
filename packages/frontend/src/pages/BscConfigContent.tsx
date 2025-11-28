@@ -309,7 +309,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
         <div className="config-section">
           <h2>Service Configuration</h2>
           <div className="form-group">
-            <label>Service Type</label>
+            <label>
+              Service Type
+              <HelpTooltip content="ClusterIP: Internal access only. NodePort: External access via node IP and port. LoadBalancer: Cloud load balancer for production." />
+            </label>
             <select
               value={config.service.type}
               onChange={(e) => handleChange('service.type', e.target.value)}
@@ -362,7 +365,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           <h2>Node Configuration</h2>
           <div className="form-grid three-columns">
             <div className="form-group">
-              <label>Cache Size (MB)</label>
+              <label>
+                Cache Size (MB)
+                <HelpTooltip content="Memory allocated for state caching. Higher values improve performance but require more RAM. Recommended: 16384MB for full nodes." />
+              </label>
               <input
                 type="number"
                 value={config.config.cache}
@@ -370,7 +376,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Sync Mode</label>
+              <label>
+                Sync Mode
+                <HelpTooltip content="Snap: Fast sync with state snapshots (recommended). Full: Downloads entire blockchain. Light: Minimal storage, downloads headers only." />
+              </label>
               <select
                 value={config.config.syncMode}
                 onChange={(e) => handleChange('config.syncMode', e.target.value)}
@@ -381,7 +390,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               </select>
             </div>
             <div className="form-group">
-              <label>Verbosity (0-5)</label>
+              <label>
+                Verbosity (0-5)
+                <HelpTooltip content="Logging level. 0: Silent, 1: Error, 2: Warn, 3: Info (recommended), 4: Debug, 5: Trace. Higher values produce more logs." />
+              </label>
               <input
                 type="number"
                 min="0"
@@ -394,7 +406,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>HTTP API</label>
+              <label>
+                HTTP API
+                <HelpTooltip content="Comma-separated list of RPC APIs available over HTTP. Common: eth, net, web3, txpool, parlia. More APIs = more attack surface." />
+              </label>
               <input
                 type="text"
                 value={config.config.httpApi}
@@ -403,7 +418,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>WebSocket API</label>
+              <label>
+                WebSocket API
+                <HelpTooltip content="Comma-separated list of RPC APIs available over WebSocket. WebSocket enables real-time event subscriptions. Common: eth, net, web3." />
+              </label>
               <input
                 type="text"
                 value={config.config.wsApi}
@@ -416,7 +434,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           <h3>Transaction Pool</h3>
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>Global Slots</label>
+              <label>
+                Global Slots
+                <HelpTooltip content="Maximum number of executable transaction slots for all accounts. Higher values allow more pending transactions but use more memory." />
+              </label>
               <input
                 type="number"
                 value={config.config.txpool.globalslots}
@@ -424,7 +445,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Global Queue</label>
+              <label>
+                Global Queue
+                <HelpTooltip content="Maximum number of non-executable transaction slots for all accounts. Queued transactions wait for nonce gaps to be filled." />
+              </label>
               <input
                 type="number"
                 value={config.config.txpool.globalqueue}
@@ -439,7 +463,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           <h2>Resource Requirements</h2>
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>CPU Requests</label>
+              <label>
+                CPU Requests
+                <HelpTooltip content="CPU cores reserved for the node. Use whole numbers (8) or millicores (4000m). Fast node: 8-16 cores, Archive: 32+ cores." />
+              </label>
               <input
                 type="text"
                 value={config.resources.requests.cpu}
@@ -448,7 +475,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Memory Requests</label>
+              <label>
+                Memory Requests
+                <HelpTooltip content="RAM reserved for the node. Use Gi (gibibytes) or Mi (mebibytes). Fast node: 32-64Gi, Full: 64Gi, Archive: 128Gi+." />
+              </label>
               <input
                 type="text"
                 value={config.resources.requests.memory}
@@ -469,13 +499,19 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                 checked={config.persistence.enabled}
                 onChange={(e) => handleChange('persistence.enabled', e.target.checked)}
               />
-              Enable Persistence (PVC)
+              <span>
+                Enable Persistence (PVC)
+                <HelpTooltip content="Creates a PersistentVolumeClaim to store blockchain data. Essential for production - without this, data is lost on pod restart." />
+              </span>
             </label>
           </div>
           {config.persistence.enabled && (
             <div className="form-grid two-columns">
               <div className="form-group">
-                <label>Storage Class</label>
+                <label>
+                  Storage Class
+                  <HelpTooltip content="Kubernetes StorageClass name for provisioning. Examples: local-path, gp3, premium-ssd. Must support the required disk size." />
+                </label>
                 <input
                   type="text"
                   value={config.persistence.storageClass}
@@ -483,7 +519,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                 />
               </div>
               <div className="form-group">
-                <label>Size</label>
+                <label>
+                  Size
+                  <HelpTooltip content="Disk space for blockchain data. Fast/Full: 3Ti minimum, Archive: 10Ti+. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended." />
+                </label>
                 <input
                   type="text"
                   value={config.persistence.size}
