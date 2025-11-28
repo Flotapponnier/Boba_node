@@ -1,0 +1,28 @@
+{
+  "name": "boba-node",
+  "version": "1.0.0",
+  "description": "Open-source UI tool for generating Helm charts for blockchain nodes",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspace=backend"
+  },
+  "keywords": [
+    "helm",
+    "kubernetes",
+    "blockchain",
+    "bsc",
+    "node"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
