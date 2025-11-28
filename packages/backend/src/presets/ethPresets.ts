@@ -79,21 +79,21 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
   },
 
   archive: {
-    description: 'Archive node - full historical state, all queries supported',
+    description: 'Archive node - full historical state from genesis (official: 12TB+ storage, path-based ~2TB)',
     config: {
-      syncMode: 'full',
-      gcMode: 'archive',
-      stateScheme: 'path',
-      cache: 40960, // 40GB
+      syncMode: 'full', // Full sync for archive
+      gcMode: 'archive', // No garbage collection
+      stateScheme: 'path', // Path-based archive (new in v1.16.0, much smaller)
+      cache: 40960, // 40GB for archive performance
       cacheDatabase: 50,
       cacheGc: 25,
       cacheSnapshot: 10,
       snapshot: true,
-      historyState: 0, // Full archive
-      historyTransactions: 0,
+      historyState: 0, // Keep all historical states
+      historyTransactions: 0, // Keep all transactions
       metricsEnabled: true,
       httpApi: 'eth,net,web3,debug,trace,txpool',
-      wsApi: 'eth,net,web3',
+      wsApi: 'eth,net,web3,debug',
       txpool: {
         accountslots: 16,
         globalslots: 5120,
@@ -104,6 +104,10 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     },
     resources: {
       requests: {
+        cpu: '16', // High CPU for historical queries
+        memory: '64Gi', // Minimum for archive operations
+      },
+      limits: {
         cpu: '32',
         memory: '128Gi',
       },
@@ -111,25 +115,25 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     persistence: {
       enabled: true,
       storageClass: 'local-path',
-      size: '20Ti',
+      size: '20Ti', // Official: 12-20TB depending on client (hash-based), path-based ~2TB
     },
   },
 
   validator: {
-    description: 'Validator node - staking node with consensus client',
+    description: 'Validator node - PoS staking with consensus client (requires 32 ETH stake)',
     config: {
       syncMode: 'snap',
       gcMode: 'full',
       stateScheme: 'path',
-      cache: 16384, // 16GB
+      cache: 16384, // 16GB cache
       snapshot: true,
       historyState: 90000,
       historyTransactions: 2350000,
-      authrpcEnabled: true,
-      authrpcPort: 8551,
+      authrpcEnabled: true, // Required for consensus client communication
+      authrpcPort: 8551, // Engine API port
       authrpcVhosts: 'localhost',
       metricsEnabled: true,
-      httpApi: 'eth,net,web3',
+      httpApi: 'eth,net,web3', // Limited APIs for security
       wsApi: 'eth,net,web3',
       txpool: {
         accountslots: 16,
@@ -141,14 +145,18 @@ export const ETH_NODE_PRESETS: Record<string, EthNodePreset> = {
     },
     resources: {
       requests: {
+        cpu: '8', // Official: 16 cores with 8/16 threads recommended
+        memory: '16Gi', // Official: 16GB minimum
+      },
+      limits: {
         cpu: '16',
-        memory: '64Gi',
+        memory: '32Gi',
       },
     },
     persistence: {
       enabled: true,
       storageClass: 'local-path',
-      size: '2Ti',
+      size: '2Ti', // Same as full node
     },
   },
 };

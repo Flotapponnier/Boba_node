@@ -53,20 +53,20 @@ const ETH_NODE_TYPES: NodeTypeOption[] = [
   {
     type: 'full',
     title: 'Full Node',
-    description: 'Complete validation, keeps recent ~128 blocks state.',
-    specs: '16 cores | 64GB RAM | 2TB SSD'
+    description: 'Complete validation, snap sync, recent ~128 blocks state.',
+    specs: '8 cores | 16GB RAM | 2TB SSD'
   },
   {
     type: 'archive',
     title: 'Archive Node',
-    description: 'Full historical state from genesis (~18-20TB).',
-    specs: '32 cores | 128GB RAM | 20TB SSD'
+    description: 'Full historical state from genesis (path-based).',
+    specs: '16 cores | 64GB RAM | 12-20TB SSD'
   },
   {
     type: 'validator',
     title: 'Validator Node',
-    description: 'Staking node with consensus client (PoS).',
-    specs: '16 cores | 64GB RAM | 2TB SSD'
+    description: 'Staking node with consensus client (requires 32 ETH).',
+    specs: '8 cores | 16GB RAM | 2TB SSD'
   }
 ];
 
@@ -74,20 +74,20 @@ const ARB_NODE_TYPES: NodeTypeOption[] = [
   {
     type: 'full',
     title: 'Full Node',
-    description: 'Pruned full node, keeps recent state.',
-    specs: '4 cores | 16GB RAM | 2TB SSD'
+    description: 'Pruned full node with watchtower mode.',
+    specs: '4 cores | 16GB RAM | 2TB NVMe'
   },
   {
     type: 'archive',
     title: 'Archive Node',
-    description: 'Complete historical data (9.7TB for Arbitrum One).',
-    specs: '8 cores | 32GB RAM | 12TB SSD'
+    description: 'Complete historical data (Arb One: 9.7TB + 850GB/month).',
+    specs: '4 cores | 16GB RAM | 12TB NVMe'
   },
   {
     type: 'validator',
     title: 'Validator Node',
-    description: 'Validator node with watchtower capabilities.',
-    specs: '8 cores | 24GB RAM | 3TB SSD'
+    description: 'Validator with staking (allowlisted for mainnet).',
+    specs: '4 cores | 16GB RAM | 3TB NVMe'
   }
 ];
 

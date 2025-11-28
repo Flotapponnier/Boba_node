@@ -24,20 +24,20 @@ export const ARB_NODE_PRESETS: Record<ArbNodeType, ArbNodePreset> = {
   // Full node - recommended for most use cases
   full: {
     nodeType: 'full',
-    description: 'Full node with pruning, suitable for most RPC workloads',
+    description: 'Full node with pruning (official: 4-core CPU, 16GB RAM, NVMe SSD)',
     config: {
       pruneMode: 'full',
       executionCachingArchive: false,
       cachingSnapshotKeep: 128,
-      initLatest: 'pruned',
+      initLatest: 'pruned', // Use pruned snapshot for faster sync
       p2pMaxPeers: 50,
-      httpApi: 'net,web3,eth,arb',
+      httpApi: 'net,web3,eth,arb', // Standard APIs
       wsApi: 'net,web3,eth,arb',
     },
     resources: {
       requests: {
-        cpu: '4',
-        memory: '16Gi',
+        cpu: '4', // Official minimum: 4-core CPU
+        memory: '16Gi', // Official minimum: 16GB RAM
       },
       limits: {
         cpu: '8',
@@ -45,67 +45,67 @@ export const ARB_NODE_PRESETS: Record<ArbNodeType, ArbNodePreset> = {
       },
     },
     persistence: {
-      size: '2Ti',
+      size: '2Ti', // Depends on chain and traffic, 2TB is safe for Arbitrum One
     },
   },
 
   // Archive node - complete historical data
   archive: {
     nodeType: 'archive',
-    description: 'Archive node with full historical state (9.7TB for Arbitrum One)',
+    description: 'Archive node with full historical state (official: Arb One 9.7TB + 850GB/month, Nova 4.3TB + 1.8TB/month)',
     config: {
       pruneMode: 'archive',
-      executionCachingArchive: true,
+      executionCachingArchive: true, // Enable archive mode for Nitro
       cachingSnapshotKeep: 0, // No pruning for archive
-      initLatest: 'archive',
+      initLatest: 'archive', // Use archive snapshot
       p2pMaxPeers: 100,
-      httpApi: 'net,web3,eth,arb,debug,trace',
+      httpApi: 'net,web3,eth,arb,debug,trace', // Full API suite for archive
       wsApi: 'net,web3,eth,arb,debug',
       cachingTrieTimeLimit: '1h',
     },
     resources: {
       requests: {
+        cpu: '4', // Official minimum: 4+ core CPU
+        memory: '16Gi', // Official minimum: 16GB+ for Nitro
+      },
+      limits: {
         cpu: '8',
         memory: '32Gi',
       },
-      limits: {
-        cpu: '16',
-        memory: '64Gi',
-      },
     },
     persistence: {
-      size: '12Ti', // Arbitrum One: ~9.7TB + growth buffer
+      size: '12Ti', // Arbitrum One: ~9.7TB + growth (850GB/month), 12Ti for buffer
     },
   },
 
   // Validator node - for staking and validation
   validator: {
     nodeType: 'validator',
-    description: 'Validator node with staking capabilities',
+    description: 'Validator node with watchtower mode (official: allowlisted for mainnet assertions)',
     config: {
       pruneMode: 'validator',
       executionCachingArchive: false,
       cachingSnapshotKeep: 128,
       initLatest: 'pruned',
-      stakerEnable: true,
-      stakerStrategy: 'Defensive',
+      stakerEnable: true, // Enable validator mode
+      stakerStrategy: 'Defensive', // Defensive strategy is common for validators
       p2pMaxPeers: 75,
       httpApi: 'net,web3,eth,arb',
       wsApi: 'net,web3,eth,arb',
-      metricsEnable: true,
+      metricsEnable: true, // Important for monitoring validator performance
     },
     resources: {
       requests: {
-        cpu: '8',
-        memory: '24Gi',
+        cpu: '4', // Same minimum as full node
+        memory: '16Gi', // Official minimum for Nitro
       },
       limits: {
-        cpu: '16',
-        memory: '48Gi',
+        cpu: '8',
+        memory: '32Gi',
       },
     },
     persistence: {
-      size: '3Ti',
+      size: '3Ti', // Slightly more than full node for validator data
     },
   },
 };

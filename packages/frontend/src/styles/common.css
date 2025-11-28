@@ -19,15 +19,16 @@
 }
 
 .node-type-card:hover {
-  border-color: #667eea;
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  border-color: #555;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  background: #242424;
 }
 
 .node-type-card.selected {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.15);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: #666;
+  background: #242424;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .node-type-card h3 {
@@ -63,10 +64,11 @@
 .config-section h2 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #667eea;
+  color: #fff;
   font-size: 1.5rem;
-  border-bottom: 2px solid #333;
+  border-bottom: 1px solid #333;
   padding-bottom: 10px;
+  font-weight: 600;
 }
 
 /* Form Groups */
@@ -100,7 +102,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #555;
+  background: #252525;
 }
 
 .form-group input[type="checkbox"] {
@@ -149,42 +152,64 @@
 
 /* Buttons */
 .button-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1a1a1a;
   color: white;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 12px 28px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.3px;
+}
+
+.button-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
 }
 
 .button-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: #222;
+  border-color: #555;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.button-primary:hover::before {
+  left: 100%;
 }
 
 .button-primary:active {
   transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .button-secondary {
-  background: #2a2a2a;
-  color: white;
-  padding: 12px 30px;
-  border: 1px solid #444;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  background: transparent;
+  color: #999;
+  padding: 12px 28px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.3px;
 }
 
 .button-secondary:hover {
-  background: #333;
-  border-color: #667eea;
+  background: #1a1a1a;
+  border-color: #444;
+  color: #fff;
 }
 
 /* Help Text */
@@ -234,7 +259,7 @@
 }
 
 input:checked + .toggle-slider {
-  background-color: #667eea;
+  background-color: #333;
 }
 
 input:checked + .toggle-slider:before {
@@ -271,21 +296,22 @@ input:checked + .toggle-slider:before {
 
 .doc-link {
   display: inline-block;
-  color: #667eea;
+  color: #ccc;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
   padding: 8px 16px;
-  border: 1px solid #667eea;
+  border: 1px solid #333;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  background: transparent;
 }
 
 .doc-link:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: #764ba2;
-  color: #764ba2;
-  transform: translateY(-2px);
+  background: #1a1a1a;
+  border-color: #555;
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 /* Back Button */
@@ -304,9 +330,9 @@ input:checked + .toggle-slider:before {
 }
 
 .back-button:hover {
-  border-color: #667eea;
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  border-color: #555;
+  color: #fff;
+  background: #1a1a1a;
 }
 
 /* Loading State */
@@ -334,4 +360,10 @@ input:checked + .toggle-slider:before {
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
+}
+
+.section-header-with-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

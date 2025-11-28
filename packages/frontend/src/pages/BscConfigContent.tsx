@@ -367,7 +367,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
             <div className="form-group">
               <label>
                 Cache Size (MB)
-                <HelpTooltip content="Memory allocated for state caching. Higher values improve performance but require more RAM. Recommended: 16384MB for full nodes." />
+                <HelpTooltip content="Memory allocated for state caching. Higher values improve performance but require more RAM. Recommended: 10000-16384MB depending on available memory." />
               </label>
               <input
                 type="number"
