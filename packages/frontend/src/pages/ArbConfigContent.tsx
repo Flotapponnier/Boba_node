@@ -30,6 +30,9 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
             setConfig(prev => ({
               ...prev,
               nodeType: nodeType as ArbNodeType,
+              deploymentName: `arb-${nodeType}`,
+              nodeName: `arb-${nodeType}-node`,
+              namespace: `arb-${nodeType}`,
               config: { ...prev.config, ...preset.config },
               resources: preset.resources,
               persistence: preset.persistence,
@@ -102,11 +105,25 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
     }
   };
 
+  // Get node description based on type
+  const getNodeDescription = () => {
+    switch (config.nodeType) {
+      case 'full':
+        return 'Layer 2 node with pruned state running in watchtower mode. Validates rollup state against L1 and provides RPC access for dApps. Suitable for most production workloads requiring L2 interaction.';
+      case 'archive':
+        return 'Complete historical L2 state from genesis with full transaction history. Required for analytics, block explorers, and applications needing historical state queries across all Arbitrum blocks.';
+      case 'validator':
+        return 'Verifies L2 state correctness and can post assertions to L1. Watchtower mode monitors for fraud. Active validation requires allow-listing on mainnet. Essential for network security and dispute resolution.';
+      default:
+        return 'Configure and deploy your Arbitrum Nitro node to Kubernetes';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>Arbitrum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
-        <p>Configure and deploy your Arbitrum Nitro node to Kubernetes</p>
+        <p>{getNodeDescription()}</p>
         <div className="doc-link-container">
           <a
             href={getDocUrl()}
@@ -125,7 +142,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
       <form onSubmit={handleSubmit}>
         {/* Basic Configuration */}
         <div className="config-section">
-          <h2>Basic Configuration</h2>
+          <SectionHeader
+            title="Basic Configuration"
+            tooltip="Essential deployment identifiers for your Arbitrum Nitro node. These settings determine how your Layer 2 node is identified and organized in your Kubernetes environment."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>Deployment Name *</label>
@@ -172,7 +192,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Image Configuration */}
         <div className="config-section">
-          <h2>Image Configuration</h2>
+          <SectionHeader
+            title="Image Configuration"
+            tooltip="Docker image settings for Arbitrum Nitro node. Official images from offchainlabs/nitro-node. Nitro is Arbitrum's optimistic rollup technology. Note: v3.8.0+ changes database schema and cannot be downgraded."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label>Repository</label>
@@ -215,7 +238,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Service Configuration */}
         <div className="config-section">
-          <h2>Service Configuration</h2>
+          <SectionHeader
+            title="Service Configuration"
+            tooltip="Kubernetes Service configuration for network access to your Arbitrum node. Controls how the node is exposed to clients and peers. Includes standard RPC/WS ports plus sequencer feed port for L2 transaction streaming."
+          />
           <div className="form-group">
             <label>Service Type</label>
             <select
@@ -304,7 +330,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Node Configuration */}
         <div className="config-section">
-          <h2>Node Configuration</h2>
+          <SectionHeader
+            title="Node Configuration"
+            tooltip="Arbitrum Nitro-specific parameters. Parent Chain URL connects to Ethereum L1 for state verification. Prune mode determines state retention: 'full' for recent states, 'archive' for complete history. Single-core performance is critical for Nitro nodes."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>Parent Chain URL (L1 Ethereum RPC)</label>
@@ -386,7 +415,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Resources */}
         <div className="config-section">
-          <h2>Resources</h2>
+          <SectionHeader
+            title="Resources"
+            tooltip="Kubernetes resource allocation for Arbitrum Nitro node. Minimum requirements: 4-core CPU (single-core performance matters), 16GB RAM. Full nodes need 2TB storage, Archive nodes require 12TB+ for Arbitrum One. Storage grows ~850GB/month for Arb One."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>CPU Requests</label>
@@ -421,7 +453,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Persistence */}
         <div className="config-section">
-          <h2>Storage</h2>
+          <SectionHeader
+            title="Storage"
+            tooltip="Persistent storage for Arbitrum blockchain data. NVMe SSDs strongly recommended due to high I/O requirements. Arbitrum One: 560GB pruned (grows 200GB/month), Nova: 400GB pruned (grows 1.6TB/month). Archive nodes need significantly more."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label className="checkbox-label">
@@ -463,7 +498,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Snapshot Download */}
         <div className="config-section">
-          <h2>Snapshot Download</h2>
+          <SectionHeader
+            title="Snapshot Download"
+            tooltip="Pre-synced Arbitrum blockchain snapshot for faster node initialization. Note: As of May 2024, official snapshot service discontinued due to rapid state growth. Community snapshots may be available. Verify checksum if provided."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -495,7 +533,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         {/* Monitoring */}
         <div className="config-section">
-          <h2>Monitoring Stack</h2>
+          <SectionHeader
+            title="Monitoring Stack"
+            tooltip="Prometheus metrics and Grafana dashboards for Arbitrum node monitoring. Tracks L2 sync progress, sequencer feed connection, batch posting, parent chain connectivity, and resource utilization. Essential for production L2 operations."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -518,7 +559,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
         {/* Validator Configuration */}
         {config.nodeType === 'validator' && (
           <div className="config-section">
-            <h2>Validator Configuration</h2>
+            <SectionHeader
+              title="Validator Configuration"
+              tooltip="Arbitrum validator/staker configuration. Validators verify L2 state against L1. Watchtower mode (enabled by default) monitors for invalid states. Staker strategies determine asserting behavior. Note: Mainnet validators require allow-listing."
+            />
             <div className="form-group">
               <label className="checkbox-label">
                 <input

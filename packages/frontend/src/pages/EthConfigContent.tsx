@@ -30,6 +30,9 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
             setConfig(prev => ({
               ...prev,
               nodeType: nodeType as EthNodeType,
+              deploymentName: `eth-${nodeType}`,
+              nodeName: `eth-${nodeType}-node`,
+              namespace: `eth-${nodeType}`,
               config: { ...prev.config, ...preset.config },
               resources: preset.resources,
               persistence: preset.persistence,
@@ -98,10 +101,25 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
         return 'https://geth.ethereum.org/docs/fundamentals/archive';
       case 'validator':
         return 'https://ethereum.org/staking/';
-      case 'fast':
       case 'full':
       default:
         return 'https://geth.ethereum.org/docs/getting-started/hardware-requirements';
+    }
+  };
+
+  // Get node description based on type
+  const getNodeDescription = () => {
+    switch (config.nodeType) {
+      case 'light':
+        return 'Downloads block headers only for minimal resource usage. Suitable for lightweight applications and mobile wallets requiring basic blockchain interaction without full validation.';
+      case 'full':
+        return 'Validates all blocks with snap sync, keeping recent state. Recommended for most applications requiring reliable RPC access, smart contract deployment, and transaction broadcasting.';
+      case 'archive':
+        return 'Maintains complete historical state from genesis. Essential for block explorers, analytics platforms, and applications requiring historical state queries at any block height.';
+      case 'validator':
+        return 'Participates in Proof-of-Stake consensus with block proposals and attestations. Requires 32 ETH stake, consensus client, and high uptime. Earns staking rewards and transaction fees.';
+      default:
+        return 'Configure and deploy your Ethereum node to Kubernetes';
     }
   };
 
@@ -109,7 +127,7 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>Ethereum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
-        <p>Configure and deploy your Ethereum {config.nodeType} node to Kubernetes</p>
+        <p>{getNodeDescription()}</p>
         <div className="doc-link-container">
           <a
             href={getDocUrl()}

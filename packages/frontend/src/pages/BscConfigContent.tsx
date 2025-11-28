@@ -120,6 +120,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
             setConfig(prev => prev ? ({
               ...prev,
               nodeType: nodeType as BscNodeType,
+              deploymentName: `bsc-${nodeType}`,
+              nodeName: `bsc-${nodeType}-node`,
+              namespace: `bsc-${nodeType}`,
               config: { ...prev.config, ...preset.config },
               resources: preset.resources,
               persistence: { ...prev.persistence, size: preset.persistence.size },
@@ -206,11 +209,27 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
     return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/';
   };
 
+  // Get node description based on type
+  const getNodeDescription = () => {
+    switch (config.nodeType) {
+      case 'fast':
+        return 'Optimized for high-performance RPC with minimal state verification. Ideal for applications requiring fast query responses with reduced resource overhead.';
+      case 'full':
+        return 'Complete blockchain validation with full state verification. Recommended for most production use cases requiring reliable RPC services and data integrity.';
+      case 'archive':
+        return 'Stores complete historical state from genesis block. Required for applications needing historical data queries, analytics platforms, and block explorers.';
+      case 'validator':
+        return 'Block production and consensus participation. Requires BNB stake and high availability infrastructure. Earns block rewards for securing the network.';
+      default:
+        return 'Configure your Binance Smart Chain node parameters';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>BSC {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
-        <p>Configure your Binance Smart Chain {config.nodeType} node parameters</p>
+        <p>{getNodeDescription()}</p>
         <div className="doc-link-container">
           <a
             href={getDocUrl()}
