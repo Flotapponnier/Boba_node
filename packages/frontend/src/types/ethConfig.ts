@@ -1,7 +1,7 @@
 // Frontend types for Ethereum configuration
 // Mirrors backend types but simplified for form handling
 
-export type EthNodeType = 'light' | 'full' | 'archive' | 'validator';
+export type EthNodeType = 'light' | 'fast' | 'full' | 'archive' | 'validator';
 export type EthSyncMode = 'snap' | 'full' | 'light';
 export type EthGcMode = 'full' | 'archive';
 export type EthStateScheme = 'hash' | 'path';

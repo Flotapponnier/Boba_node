@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import HelpTooltip from '../components/HelpTooltip';
+import SectionHeader from '../components/SectionHeader';
 import '../styles/common.css';
 
 interface BscConfig {
@@ -228,7 +229,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
       <form onSubmit={(e) => { e.preventDefault(); handleGenerate(); }}>
         {/* Basic Configuration */}
         <div className="config-section">
-          <h2>Basic Configuration</h2>
+          <SectionHeader
+            title="Basic Configuration"
+            tooltip="Essential identifiers for your BSC node deployment. These values determine how your node is named and organized in your Kubernetes cluster."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>
@@ -242,7 +246,6 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                 placeholder="e.g., production, staging, dev"
                 required
               />
-              <span className="help-text">Must be lowercase alphanumeric with hyphens</span>
             </div>
             <div className="form-group">
               <label>
@@ -266,14 +269,16 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                 onChange={(e) => handleChange('namespace', e.target.value)}
                 placeholder="default"
               />
-              <span className="help-text">Kubernetes namespace where the node will be deployed</span>
             </div>
           </div>
         </div>
 
         {/* Image Configuration */}
         <div className="config-section">
-          <h2>Container Image</h2>
+          <SectionHeader
+            title="Container Image"
+            tooltip="Docker container image settings for the BSC node. Uses the official BNB Chain image from GitHub Container Registry. Always verify the latest stable version before deploying to production."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label>Repository</label>
@@ -307,7 +312,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Service Configuration */}
         <div className="config-section">
-          <h2>Service Configuration</h2>
+          <SectionHeader
+            title="Service Configuration"
+            tooltip="Kubernetes Service configuration for network access. Service type determines how your node is exposed: ClusterIP for internal-only access, NodePort for external access via specific node ports, or LoadBalancer for cloud-managed load balancing."
+          />
           <div className="form-group">
             <label>
               Service Type
@@ -362,7 +370,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Node Configuration */}
         <div className="config-section">
-          <h2>Node Configuration</h2>
+          <SectionHeader
+            title="Node Configuration"
+            tooltip="Core BSC node parameters controlling sync behavior, caching, logging, and API exposure. These settings directly impact node performance, resource usage, and security. Snap sync mode is recommended for faster initial synchronization."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label>
@@ -460,7 +471,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Resources */}
         <div className="config-section">
-          <h2>Resource Requirements</h2>
+          <SectionHeader
+            title="Resource Requirements"
+            tooltip="Kubernetes resource requests defining the minimum CPU and memory allocated to your node. These values ensure your node has guaranteed resources. For production: Fast nodes need 8-16 cores and 32-64GB RAM, Archive nodes require 32+ cores and 128GB+ RAM."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>
@@ -491,7 +505,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Persistence */}
         <div className="config-section">
-          <h2>Storage Persistence</h2>
+          <SectionHeader
+            title="Storage Persistence"
+            tooltip="Persistent storage configuration using PersistentVolumeClaims (PVC). Critical for production deployments - enables data survival across pod restarts. NVMe SSDs are strongly recommended for blockchain data due to high I/O requirements. BSC mainnet requires 3TB+ for full nodes, 10TB+ for archive nodes."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -536,7 +553,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Snapshot Download */}
         <div className="config-section">
-          <h2>Snapshot Download</h2>
+          <SectionHeader
+            title="Snapshot Download"
+            tooltip="Enables downloading a pre-synced blockchain snapshot for faster initial synchronization. Highly recommended for new nodes to reduce sync time from days/weeks to hours. Snapshots are large files (1TB+) so ensure adequate bandwidth and storage."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -571,7 +591,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Monitoring */}
         <div className="config-section">
-          <h2>Monitoring Stack</h2>
+          <SectionHeader
+            title="Monitoring Stack"
+            tooltip="Integrates Prometheus metrics and Grafana dashboards for comprehensive node monitoring. Tracks sync progress, peer connections, block processing, resource usage, and chain health. Essential for production operations to detect issues proactively."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -620,7 +643,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
 
         {/* Health Probes */}
         <div className="config-section">
-          <h2>Health Probes</h2>
+          <SectionHeader
+            title="Health Probes"
+            tooltip="Kubernetes health check configurations. Liveness probes restart unhealthy pods automatically. Readiness probes prevent traffic routing to pods that aren't ready. Essential for high availability and automatic recovery from failures."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label className="checkbox-label">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EthConfig, DEFAULT_ETH_CONFIG, EthNodeType } from '../types/ethConfig';
 import HelpTooltip from '../components/HelpTooltip';
+import SectionHeader from '../components/SectionHeader';
 import '../styles/common.css';
 
 interface EthConfigContentProps {
@@ -127,7 +128,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
       <form onSubmit={handleSubmit}>
         {/* Basic Configuration */}
         <div className="config-section">
-          <h2>Basic Configuration</h2>
+          <SectionHeader
+            title="Basic Configuration"
+            tooltip="Core identifiers for your Ethereum node deployment. These settings define how your node is named and organized within your Kubernetes cluster infrastructure."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>Deployment Name *</label>
@@ -138,7 +142,6 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
                 placeholder="production-mainnet"
                 required
               />
-              <span className="help-text">Used for chart naming (lowercase, alphanumeric, hyphens)</span>
             </div>
             <div className="form-group">
               <label>Node Name</label>
@@ -166,14 +169,16 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
                   config: { ...config.config, networkId: parseInt(e.target.value) }
                 })}
               />
-              <span className="help-text">1 for mainnet</span>
             </div>
           </div>
         </div>
 
         {/* Image Configuration */}
         <div className="config-section">
-          <h2>Image Configuration</h2>
+          <SectionHeader
+            title="Image Configuration"
+            tooltip="Docker container image configuration for Geth (Go Ethereum). Uses the official ethereum/client-go image. Geth is the most widely used Ethereum execution client. Always verify the latest stable version before production deployment."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label>Repository</label>
@@ -216,7 +221,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Service Configuration */}
         <div className="config-section">
-          <h2>Service Configuration</h2>
+          <SectionHeader
+            title="Service Configuration"
+            tooltip="Kubernetes Service settings controlling network access to your Ethereum node. Service type determines exposure: ClusterIP for cluster-internal only, NodePort for external access via node IPs, LoadBalancer for cloud provider load balancing."
+          />
           <div className="form-group">
             <label>Service Type</label>
             <select
@@ -305,7 +313,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Node Configuration */}
         <div className="config-section">
-          <h2>Node Configuration</h2>
+          <SectionHeader
+            title="Node Configuration"
+            tooltip="Core Geth parameters controlling synchronization, state management, caching, and API exposure. Sync mode affects initial sync speed. Path-based state scheme (recommended) offers better performance and smaller disk footprint than hash-based. These settings significantly impact performance and resource usage."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label>Sync Mode</label>
@@ -381,7 +392,6 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
                   config: { ...config.config, historyState: parseInt(e.target.value) }
                 })}
               />
-              <span className="help-text">0 for full archive</span>
             </div>
           </div>
 
@@ -413,7 +423,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Resources */}
         <div className="config-section">
-          <h2>Resources</h2>
+          <SectionHeader
+            title="Resources"
+            tooltip="Kubernetes resource allocation for your Ethereum node. Requests guarantee minimum resources. For Ethereum mainnet: Light nodes need 2-4 cores and 4-8GB RAM, Full nodes require 8-16 cores and 16-32GB RAM, Archive nodes need 16-32 cores and 64GB+ RAM."
+          />
           <div className="form-grid two-columns">
             <div className="form-group">
               <label>CPU Requests</label>
@@ -448,7 +461,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Persistence */}
         <div className="config-section">
-          <h2>Storage</h2>
+          <SectionHeader
+            title="Storage"
+            tooltip="Persistent volume configuration for blockchain data. Essential for production - ensures data persists across pod restarts. Ethereum mainnet requires fast SSD storage: Full nodes need 2TB minimum, Archive nodes require 12-20TB+. Database grows ~14GB per week."
+          />
           <div className="form-grid three-columns">
             <div className="form-group">
               <label className="checkbox-label">
@@ -490,7 +506,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Snapshot Download */}
         <div className="config-section">
-          <h2>Snapshot Download</h2>
+          <SectionHeader
+            title="Snapshot Download"
+            tooltip="Pre-synced blockchain snapshot for faster initial synchronization. Reduces sync time from weeks to hours/days. Ethereum mainnet snapshots are 600GB+ compressed. Ensure sufficient bandwidth and temporary storage for download and extraction."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -522,7 +541,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         {/* Monitoring */}
         <div className="config-section">
-          <h2>Monitoring Stack</h2>
+          <SectionHeader
+            title="Monitoring Stack"
+            tooltip="Prometheus and Grafana integration for comprehensive node monitoring. Tracks sync status, peer count, block processing, gas usage, transaction pool, and system resources. Critical for production operations and troubleshooting."
+          />
           <div className="form-group">
             <label className="checkbox-label">
               <input
@@ -546,7 +568,10 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
         {/* Validator Configuration */}
         {config.nodeType === 'validator' && (
           <div className="config-section">
-            <h2>Validator Configuration</h2>
+            <SectionHeader
+              title="Validator Configuration"
+              tooltip="Ethereum Proof-of-Stake validator settings. Requires running both execution client (Geth) and consensus client (Prysm, Lighthouse, etc.) together. Validators need 32 ETH stake. Fee recipient address receives transaction tips and MEV rewards."
+            />
             <div className="form-group">
               <label className="checkbox-label">
                 <input

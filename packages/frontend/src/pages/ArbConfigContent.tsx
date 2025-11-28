@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArbConfig, DEFAULT_ARB_CONFIG, ArbNodeType } from '../types/arbConfig';
 import HelpTooltip from '../components/HelpTooltip';
+import SectionHeader from '../components/SectionHeader';
 import '../styles/common.css';
 
 interface ArbConfigContentProps {
@@ -135,7 +136,6 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
                 placeholder="production-mainnet"
                 required
               />
-              <span className="help-text">Used for chart naming (lowercase, alphanumeric, hyphens)</span>
             </div>
             <div className="form-group">
               <label>Node Name</label>
@@ -317,7 +317,6 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
                 })}
                 placeholder="https://ethereum-rpc.publicnode.com"
               />
-              <span className="help-text">Ethereum L1 RPC endpoint</span>
             </div>
             <div className="form-group">
               <label>Prune Mode</label>
