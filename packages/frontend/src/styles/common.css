@@ -42,6 +42,15 @@
   font-size: 0.9rem;
 }
 
+.node-type-specs {
+  margin-top: 8px;
+}
+
+.node-type-specs small {
+  color: #777;
+  font-size: 0.8rem;
+}
+
 /* Configuration Sections */
 .config-section {
   background: #1e1e1e;
@@ -241,6 +250,7 @@ input:checked + .toggle-slider:before {
 
 .config-page-header {
   margin-bottom: 40px;
+  position: relative;
 }
 
 .config-page-header h1 {
@@ -253,6 +263,27 @@ input:checked + .toggle-slider:before {
   margin: 0;
   color: #999;
   font-size: 1.1rem;
+}
+
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: none;
+  border: 1px solid #444;
+  color: #999;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 /* Loading State */

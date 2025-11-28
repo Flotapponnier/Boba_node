@@ -2,25 +2,48 @@ import { useState, useEffect } from 'react';
 import { EthConfig, DEFAULT_ETH_CONFIG, EthNodeType } from '../types/ethConfig';
 import '../styles/common.css';
 
-export default function EthConfigPage() {
+interface EthConfigContentProps {
+  nodeType: string;
+}
+
+export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
   const [config, setConfig] = useState<EthConfig>(DEFAULT_ETH_CONFIG);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Load default config from backend
+  // Load default config and preset from backend
   useEffect(() => {
     fetch('/api/defaults/eth')
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
         setConfig(data);
+
+        // Load preset based on nodeType prop
+        if (nodeType) {
+          try {
+            const presetResponse = await fetch(`/api/presets/eth/${nodeType}`);
+            const preset = await presetResponse.json();
+
+            setConfig(prev => ({
+              ...prev,
+              nodeType: nodeType as EthNodeType,
+              config: { ...prev.config, ...preset.config },
+              resources: preset.resources,
+              persistence: preset.persistence,
+            }));
+          } catch (err) {
+            console.error('Failed to load preset:', err);
+          }
+        }
+
         setLoading(false);
       })
       .catch(err => {
         console.error('Failed to load defaults:', err);
         setLoading(false);
       });
-  }, []);
+  }, [nodeType]);
 
   // Load preset when node type changes
   const loadNodeTypePreset = async (nodeType: EthNodeType) => {

@@ -5,7 +5,7 @@ export function generateChartYaml(): string {
   const chart = {
     apiVersion: 'v2',
     name: 'bsc-node',
-    description: 'Binance Smart Chain Fast Node - Optimized for real-time log streaming',
+    description: 'Binance Smart Chain Node ',
     type: 'application',
     version: '1.0.0',
     appVersion: 'latest',

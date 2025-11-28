@@ -15,7 +15,7 @@ import {
 } from './commonGenerators';
 
 export function generateEthChartYaml(): string {
-  return generateChartYaml('ethereum', 'Ethereum Geth Node - Optimized for mainnet deployment');
+  return generateChartYaml('ethereum', 'Ethereum Geth Node ');
 }
 
 export function generateEthValuesYaml(config: EthConfig, deploymentName: string): string {
