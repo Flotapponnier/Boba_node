@@ -1,4 +1,4 @@
-![Boba Node](./assets/images/boba_node_banner.png)
+![Boba Node](./packages/frontend/src/assets/boba_node_banner.png)
 
 # Boba Node
 
@@ -75,8 +75,8 @@ Boba_node/
 │           ├── pages/                 # Main configuration pages
 │           ├── types/                 # TypeScript type definitions
 │           ├── hooks/                 # Custom React hooks
-│           └── utils/                 # Helper functions
-└── assets/                   # Images and static files
+│           ├── utils/                 # Helper functions
+│           └── assets/                # Images and static files
 ```
 
 ## Roadmap
