@@ -6,6 +6,7 @@ import './BscConfigPage.css';
 interface BscConfig {
   deploymentName: string;
   nodeName: string;
+  nodeType: 'fast' | 'full' | 'archive' | 'validator';
   image: {
     repository: string;
     tag: string;
@@ -22,7 +23,8 @@ interface BscConfig {
   };
   config: {
     cache: number;
-    triesVerifyMode: 'local' | 'full' | 'insecure';
+    triesVerifyMode: 'local' | 'full' | 'insecure' | 'none';
+    gcMode: 'full' | 'archive';
     historyTransactions: number;
     rpcAllowUnprotectedTxs: boolean;
     syncMode: 'snap' | 'full' | 'light';
@@ -30,11 +32,31 @@ interface BscConfig {
     verbosity: number;
     httpApi: string;
     wsApi: string;
+    httpVirtualHosts: string;
+    httpCorsOrigins: string;
     txpool: {
       globalslots: number;
       globalqueue: number;
+      accountslots: number;
+      accountqueue: number;
       lifetime: string;
     };
+  };
+  networking?: {
+    maxPeers: number;
+    bootnodes?: string;
+    nat: string;
+    nodeDiscovery: boolean;
+  };
+  snapshot?: {
+    enabled: boolean;
+    url?: string;
+    checksum?: string;
+  };
+  monitoring?: {
+    enabled: boolean;
+    prometheusOperator: boolean;
+    grafanaDashboard: boolean;
   };
   resources: {
     requests: {
@@ -86,6 +108,31 @@ function BscConfigPage() {
       console.error('Failed to load defaults:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadNodeTypePreset = async (nodeType: string) => {
+    try {
+      const response = await axios.get(`/api/presets/${nodeType}`);
+      const preset = response.data;
+
+      if (config) {
+        setConfig({
+          ...config,
+          nodeType: preset.nodeType,
+          config: {
+            ...config.config,
+            ...preset.config,
+          },
+          resources: preset.resources,
+          persistence: {
+            ...config.persistence,
+            size: preset.persistence.size,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load preset:', error);
     }
   };
 
@@ -169,6 +216,39 @@ function BscConfigPage() {
                 value={config.nodeName}
                 onChange={(e) => handleChange('nodeName', e.target.value)}
               />
+            </div>
+          </section>
+
+          {/* Node Type */}
+          <section className="form-section node-type-section">
+            <h2>Node Type</h2>
+            <div className="node-type-selector">
+              {(['fast', 'full', 'archive', 'validator'] as const).map((type) => (
+                <div
+                  key={type}
+                  className={`node-type-card ${config.nodeType === type ? 'selected' : ''}`}
+                  onClick={() => {
+                    handleChange('nodeType', type);
+                    loadNodeTypePreset(type);
+                  }}
+                >
+                  <h3>{type.charAt(0).toUpperCase() + type.slice(1)} Node</h3>
+                  <p className="node-type-desc">
+                    {type === 'fast' && 'High performance RPC node. Best for serving requests.'}
+                    {type === 'full' && 'Complete node with recent state. Balanced performance.'}
+                    {type === 'archive' && 'Full historical data. For historical queries.'}
+                    {type === 'validator' && 'Block validation. Requires BNB stake.'}
+                  </p>
+                  <div className="node-type-specs">
+                    <small>
+                      {type === 'fast' && '16 cores | 32GB RAM | 2TB SSD'}
+                      {type === 'full' && '16 cores | 64GB RAM | 3TB SSD'}
+                      {type === 'archive' && '16 cores | 128GB RAM | 10TB SSD'}
+                      {type === 'validator' && '16 cores | 64GB RAM | 3TB SSD'}
+                    </small>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -381,6 +461,92 @@ function BscConfigPage() {
                     onChange={(e) => handleChange('persistence.size', e.target.value)}
                     placeholder="e.g., 3Ti, 1000Gi"
                   />
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* Snapshot Download */}
+          <section className="form-section">
+            <h2>Snapshot Download (Optional)</h2>
+            <div className="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={config.snapshot?.enabled || false}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleChange('snapshot', {
+                        enabled: true,
+                        url: 'https://tf-dex-prod-public-snapshot.s3-accelerate.amazonaws.com/geth-latest.tar.gz',
+                      });
+                    } else {
+                      handleChange('snapshot', { enabled: false });
+                    }
+                  }}
+                />
+                Enable Snapshot Download
+              </label>
+              <small>Downloads blockchain snapshot before first start (faster initial sync)</small>
+            </div>
+            {config.snapshot?.enabled && (
+              <div className="form-group">
+                <label>Snapshot URL</label>
+                <input
+                  type="text"
+                  value={config.snapshot.url || ''}
+                  onChange={(e) => handleChange('snapshot.url', e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+            )}
+          </section>
+
+          {/* Monitoring */}
+          <section className="form-section">
+            <h2>Monitoring (Optional)</h2>
+            <div className="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={config.monitoring?.enabled || false}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleChange('monitoring', {
+                        enabled: true,
+                        prometheusOperator: true,
+                        grafanaDashboard: true,
+                      });
+                    } else {
+                      handleChange('monitoring', { enabled: false });
+                    }
+                  }}
+                />
+                Enable Monitoring Stack
+              </label>
+              <small>Adds Prometheus ServiceMonitor and Grafana Dashboard</small>
+            </div>
+            {config.monitoring?.enabled && (
+              <>
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={config.monitoring.prometheusOperator}
+                      onChange={(e) => handleChange('monitoring.prometheusOperator', e.target.checked)}
+                    />
+                    Include Prometheus ServiceMonitor
+                  </label>
+                </div>
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={config.monitoring.grafanaDashboard}
+                      onChange={(e) => handleChange('monitoring.grafanaDashboard', e.target.checked)}
+                    />
+                    Include Grafana Dashboard
+                  </label>
                 </div>
               </>
             )}

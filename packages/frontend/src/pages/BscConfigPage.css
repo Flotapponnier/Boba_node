@@ -195,6 +195,53 @@
   color: #667eea;
 }
 
+/* Node Type Selector */
+.node-type-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.node-type-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node-type-card:hover {
+  border-color: rgba(102, 126, 234, 0.5);
+  background: rgba(102, 126, 234, 0.05);
+  transform: translateY(-2px);
+}
+
+.node-type-card.selected {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.node-type-card h3 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.node-type-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.node-type-specs small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
 @media (max-width: 1024px) {
   .config-container {
     grid-template-columns: 1fr;
@@ -202,5 +249,9 @@
 
   .action-panel {
     position: static;
+  }
+
+  .node-type-selector {
+    grid-template-columns: 1fr;
   }
 }

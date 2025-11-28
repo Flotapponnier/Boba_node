@@ -8,6 +8,11 @@ import {
   generateServiceYaml,
   generateConfigMapYaml,
 } from '../generators/bscChartGenerator';
+import {
+  generateServiceMonitorYaml,
+  generatePrometheusRuleYaml,
+  generateGrafanaDashboardConfigMap,
+} from '../generators/monitoringGenerator';
 
 export const generateChartRouter = Router();
 
@@ -44,6 +49,15 @@ generateChartRouter.post('/generate/bsc', async (req, res) => {
     archive.append(generateServiceYaml(), { name: `${chartName}/templates/service.yaml` });
     archive.append(generateConfigMapYaml(), { name: `${chartName}/templates/configmap.yaml` });
 
+    // Add monitoring templates if enabled
+    if (config.monitoring?.enabled) {
+      archive.append(generateServiceMonitorYaml(), { name: `${chartName}/templates/servicemonitor.yaml` });
+      archive.append(generatePrometheusRuleYaml(), { name: `${chartName}/templates/prometheusrule.yaml` });
+      if (config.monitoring.grafanaDashboard) {
+        archive.append(generateGrafanaDashboardConfigMap(), { name: `${chartName}/templates/grafana-dashboard.yaml` });
+      }
+    }
+
     // Finalize the archive
     await archive.finalize();
   } catch (error) {
@@ -64,11 +78,24 @@ generateChartRouter.post('/generate/bsc', async (req, res) => {
   }
 });
 
+// Endpoint to get node type presets
+generateChartRouter.get('/presets/:nodeType', (req, res) => {
+  const { NODE_PRESETS } = require('../presets/nodePresets');
+  const nodeType = req.params.nodeType;
+
+  if (!NODE_PRESETS[nodeType]) {
+    return res.status(404).json({ error: 'Node type not found' });
+  }
+
+  res.json(NODE_PRESETS[nodeType]);
+});
+
 // Endpoint to get default config
 generateChartRouter.get('/defaults/bsc', (req, res) => {
   const defaults = {
     deploymentName: 'production',
     nodeName: 'bsc-fast-node',
+    nodeType: 'fast',
     image: {
       repository: 'ghcr.io/bnb-chain/bsc',
       tag: 'v1.4.17',
@@ -86,6 +113,7 @@ generateChartRouter.get('/defaults/bsc', (req, res) => {
     config: {
       cache: 16384,
       triesVerifyMode: 'local',
+      gcMode: 'full',
       historyTransactions: 0,
       rpcAllowUnprotectedTxs: true,
       syncMode: 'snap',
@@ -93,9 +121,13 @@ generateChartRouter.get('/defaults/bsc', (req, res) => {
       verbosity: 3,
       httpApi: 'eth,net,web3,txpool,parlia',
       wsApi: 'eth,net,web3',
+      httpVirtualHosts: '*',
+      httpCorsOrigins: '*',
       txpool: {
         globalslots: 20000,
         globalqueue: 10000,
+        accountslots: 16,
+        accountqueue: 64,
         lifetime: '3h0m0s',
       },
     },

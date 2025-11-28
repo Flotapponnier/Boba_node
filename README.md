@@ -1,4 +1,4 @@
-![Boba Node](./boba_node_banner.png)
+![Boba Node](./assets/images/boba_node_banner.png)
 
 # Boba Node
 

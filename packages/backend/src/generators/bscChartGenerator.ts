@@ -17,8 +17,9 @@ export function generateChartYaml(): string {
 }
 
 export function generateValuesYaml(config: BscConfig, deploymentName: string): string {
-  const values = {
+  const values: any = {
     replicaCount: 1,
+    nodeType: config.nodeType,
     nodeName: config.nodeName,
     image: config.image,
     service: config.service,
@@ -29,7 +30,27 @@ export function generateValuesYaml(config: BscConfig, deploymentName: string): s
     readinessProbe: config.readinessProbe,
   };
 
-  return `# BSC Fast Node Configuration - ${deploymentName}\n${yaml.dump(values)}`;
+  // Add networking if provided
+  if (config.networking) {
+    values.networking = config.networking;
+  }
+
+  // Add snapshot if enabled
+  if (config.snapshot?.enabled) {
+    values.snapshot = config.snapshot;
+  }
+
+  // Add monitoring if enabled
+  if (config.monitoring?.enabled) {
+    values.monitoring = config.monitoring;
+  }
+
+  // Add validator if enabled
+  if (config.validator?.enabled) {
+    values.validator = config.validator;
+  }
+
+  return `# BSC ${config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration - ${deploymentName}\n${yaml.dump(values)}`;
 }
 
 export function generateStatefulSetYaml(): string {
@@ -63,6 +84,31 @@ spec:
           type: Unconfined
         {{- end }}
       {{- end }}
+      {{- if .Values.snapshot.enabled }}
+      initContainers:
+      - name: download-snapshot
+        image: busybox:latest
+        command:
+        - sh
+        - -c
+        - |
+          if [ ! -f /data/geth/chaindata/CURRENT ]; then
+            echo "Downloading snapshot from {{ .Values.snapshot.url }}"
+            wget -O /tmp/snapshot.tar.gz {{ .Values.snapshot.url }}
+            {{- if .Values.snapshot.checksum }}
+            echo "{{ .Values.snapshot.checksum }}  /tmp/snapshot.tar.gz" | sha256sum -c -
+            {{- end }}
+            echo "Extracting snapshot..."
+            tar -xzf /tmp/snapshot.tar.gz -C /data
+            rm /tmp/snapshot.tar.gz
+            echo "Snapshot extraction complete"
+          else
+            echo "Chaindata already exists, skipping snapshot download"
+          fi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      {{- end }}
       containers:
       - name: bsc
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -80,6 +126,7 @@ spec:
           - --ws.port={{ .Values.service.ports.ws.port }}
           - --cache={{ .Values.config.cache }}
           - --tries-verify-mode={{ .Values.config.triesVerifyMode }}
+          - --gcmode={{ .Values.config.gcMode }}
           - --history.transactions={{ .Values.config.historyTransactions }}
           {{- if .Values.config.rpcAllowUnprotectedTxs }}
           - --rpc.allow-unprotected-txs
@@ -87,6 +134,18 @@ spec:
           - --syncmode={{ .Values.config.syncMode }}
           {{- if .Values.config.ipcDisable }}
           - --ipcdisable
+          {{- end }}
+          - --http.vhosts={{ .Values.config.httpVirtualHosts }}
+          - --http.corsdomain={{ .Values.config.httpCorsOrigins }}
+          {{- if .Values.networking }}
+          - --maxpeers={{ .Values.networking.maxPeers }}
+          {{- if .Values.networking.bootnodes }}
+          - --bootnodes={{ .Values.networking.bootnodes }}
+          {{- end }}
+          - --nat={{ .Values.networking.nat }}
+          {{- if not .Values.networking.nodeDiscovery }}
+          - --nodiscover
+          {{- end }}
           {{- end }}
           - --metrics
           - --metrics.addr=0.0.0.0

@@ -4,6 +4,7 @@ export const BscConfigSchema = z.object({
   // Basic info
   deploymentName: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Must be lowercase alphanumeric with hyphens'),
   nodeName: z.string().min(1),
+  nodeType: z.enum(['fast', 'full', 'archive', 'validator']).default('fast'),
 
   // Image
   image: z.object({
@@ -38,20 +39,59 @@ export const BscConfigSchema = z.object({
   // Node config
   config: z.object({
     cache: z.number().int().min(1024).default(16384),
-    triesVerifyMode: z.enum(['local', 'full', 'insecure']).default('local'),
+    triesVerifyMode: z.enum(['local', 'full', 'insecure', 'none']).default('local'),
     historyTransactions: z.number().int().min(0).default(0),
     rpcAllowUnprotectedTxs: z.boolean().default(true),
     syncMode: z.enum(['snap', 'full', 'light']).default('snap'),
+    gcMode: z.enum(['full', 'archive']).default('full'),
     ipcDisable: z.boolean().default(true),
     verbosity: z.number().int().min(0).max(5).default(3),
     httpApi: z.string().default('eth,net,web3,txpool,parlia'),
     wsApi: z.string().default('eth,net,web3'),
+    httpVirtualHosts: z.string().default('*'),
+    httpCorsOrigins: z.string().default('*'),
     txpool: z.object({
       globalslots: z.number().int().min(1).default(20000),
       globalqueue: z.number().int().min(1).default(10000),
+      accountslots: z.number().int().min(1).default(16),
+      accountqueue: z.number().int().min(1).default(64),
       lifetime: z.string().default('3h0m0s'),
     }),
   }),
+
+  // Networking (Advanced)
+  networking: z.object({
+    maxPeers: z.number().int().min(1).max(200).default(50),
+    bootnodes: z.string().optional(),
+    nat: z.string().default('any'),
+    nodeDiscovery: z.boolean().default(true),
+  }).optional(),
+
+  // Snapshot download
+  snapshot: z.object({
+    enabled: z.boolean().default(false),
+    url: z.string().optional(),
+    checksum: z.string().optional(),
+  }).optional(),
+
+  // Monitoring
+  monitoring: z.object({
+    enabled: z.boolean().default(false),
+    prometheusOperator: z.boolean().default(true),
+    grafanaDashboard: z.boolean().default(true),
+    serviceMonitor: z.object({
+      interval: z.string().default('30s'),
+      scrapeTimeout: z.string().default('10s'),
+    }).optional(),
+  }).optional(),
+
+  // Validator settings (only for validator nodes)
+  validator: z.object({
+    enabled: z.boolean().default(false),
+    unlockAccount: z.string().optional(),
+    password: z.string().optional(),
+    extraData: z.string().optional(),
+  }).optional(),
 
   // Resources
   resources: z.object({

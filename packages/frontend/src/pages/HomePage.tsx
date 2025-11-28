@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import bannerImage from '../assets/boba_node_banner.png';
 import bscImage from '../assets/boba_node_bsc.png';
+import ethereumImage from '../assets/boba_node_ethereum.png';
+import arbitrumImage from '../assets/boba_node_arbitrum.png';
 import './HomePage.css';
 
 interface NodeCard {
@@ -25,7 +27,7 @@ const nodes: NodeCard[] = [
     id: 'ethereum',
     name: 'Ethereum Node',
     description: 'Ethereum Full Node - Coming soon',
-    image: '',
+    image: ethereumImage,
     available: false,
     route: '/ethereum',
   },
@@ -33,7 +35,7 @@ const nodes: NodeCard[] = [
     id: 'arbitrum',
     name: 'Arbitrum Node',
     description: 'Arbitrum Layer 2 Node - Coming soon',
-    image: '',
+    image: arbitrumImage,
     available: false,
     route: '/arbitrum',
   },
