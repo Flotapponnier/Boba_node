@@ -119,6 +119,48 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
     }
   };
 
+  // Get context-aware CPU tooltip based on node type
+  const getCpuTooltip = () => {
+    switch (config.nodeType) {
+      case 'full':
+        return 'CPU cores reserved for full node. Use whole numbers (4) or millicores (4000m). Full nodes: 4-core minimum, single-core performance matters for Nitro.';
+      case 'archive':
+        return 'CPU cores reserved for archive node. Use whole numbers (4) or millicores (4000m). Archive nodes: 4-core minimum, high single-core performance for historical queries.';
+      case 'validator':
+        return 'CPU cores reserved for validator node. Use whole numbers (4) or millicores (4000m). Validators: 4-core minimum for state verification and L1 monitoring.';
+      default:
+        return 'CPU cores reserved for the node.';
+    }
+  };
+
+  // Get context-aware memory tooltip based on node type
+  const getMemoryTooltip = () => {
+    switch (config.nodeType) {
+      case 'full':
+        return 'RAM reserved for full node. Use Gi (gibibytes) or Mi (mebibytes). Full nodes: 16Gi minimum for pruned L2 state and watchtower mode.';
+      case 'archive':
+        return 'RAM reserved for archive node. Use Gi (gibibytes) or Mi (mebibytes). Archive nodes: 16Gi+ for complete historical L2 state.';
+      case 'validator':
+        return 'RAM reserved for validator node. Use Gi (gibibytes) or Mi (mebibytes). Validators: 16Gi+ for state verification and assertion posting.';
+      default:
+        return 'RAM reserved for the node.';
+    }
+  };
+
+  // Get context-aware storage tooltip based on node type
+  const getStorageTooltip = () => {
+    switch (config.nodeType) {
+      case 'full':
+        return 'Disk space for full node L2 data. 2Ti minimum (Arb One: ~560GB + 200GB/month growth). Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
+      case 'archive':
+        return 'Disk space for archive node L2 data. 12Ti+ required (Arb One: ~9.7TB + 850GB/month growth). Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
+      case 'validator':
+        return 'Disk space for validator node data. 2Ti minimum recommended for L2 state and L1 monitoring. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
+      default:
+        return 'Disk space for blockchain data.';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
@@ -148,7 +190,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           />
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>Deployment Name *</label>
+              <label>
+                Deployment Name *
+                <HelpTooltip content="Unique identifier for this deployment. Used in Helm chart naming and Kubernetes resources. Must be lowercase alphanumeric with hyphens only." />
+              </label>
               <input
                 type="text"
                 value={config.deploymentName}
@@ -158,7 +203,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Node Name</label>
+              <label>
+                Node Name
+                <HelpTooltip content="Human-readable name for your Arbitrum node. Used in labels and service discovery within the cluster." />
+              </label>
               <input
                 type="text"
                 value={config.nodeName}
@@ -166,7 +214,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Namespace</label>
+              <label>
+                Namespace
+                <HelpTooltip content="Kubernetes namespace for deployment. Namespaces help organize L2 node resources in your cluster." />
+              </label>
               <input
                 type="text"
                 value={config.namespace}
@@ -174,7 +225,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Chain</label>
+              <label>
+                Chain
+                <HelpTooltip content="Arbitrum chain to connect to. Arb One: Main L2 network. Nova: Low-cost chain for gaming/social. Sepolia: Testnet for development." />
+              </label>
               <select
                 value={config.config.chainName}
                 onChange={(e) => setConfig({
@@ -198,7 +252,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           />
           <div className="form-grid three-columns">
             <div className="form-group">
-              <label>Repository</label>
+              <label>
+                Repository
+                <HelpTooltip content="Docker image repository. Default: offchainlabs/nitro-node for official Arbitrum Nitro images." />
+              </label>
               <input
                 type="text"
                 value={config.image.repository}
@@ -209,7 +266,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Tag</label>
+              <label>
+                Tag
+                <HelpTooltip content="Nitro node version tag. Check github.com/OffchainLabs/nitro for latest releases. Note: v3.8.0+ cannot downgrade." />
+              </label>
               <input
                 type="text"
                 value={config.image.tag}
@@ -220,7 +280,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Pull Policy</label>
+              <label>
+                Pull Policy
+                <HelpTooltip content="When to pull the image. IfNotPresent: Use cached image. Always: Pull on every restart. Never: Only use local image." />
+              </label>
               <select
                 value={config.image.pullPolicy}
                 onChange={(e) => setConfig({
@@ -243,7 +306,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
             tooltip="Kubernetes Service configuration for network access to your Arbitrum node. Controls how the node is exposed to clients and peers. Includes standard RPC/WS ports plus sequencer feed port for L2 transaction streaming."
           />
           <div className="form-group">
-            <label>Service Type</label>
+            <label>
+              Service Type
+              <HelpTooltip content="ClusterIP: Internal access only. NodePort: External access via node IP and port. LoadBalancer: Cloud load balancer for production." />
+            </label>
             <select
               value={config.service.type}
               onChange={(e) => setConfig({
@@ -258,7 +324,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           </div>
           <div className="form-grid four-columns">
             <div className="form-group">
-              <label>HTTP Port</label>
+              <label>
+                HTTP Port
+                <HelpTooltip content="HTTP JSON-RPC API port. Default: 8547. Used for L2 RPC calls, contract interactions, and transaction broadcasting." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.http.port}
@@ -275,7 +344,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>WS Port</label>
+              <label>
+                WS Port
+                <HelpTooltip content="WebSocket RPC port. Default: 8548. Enables real-time L2 event subscriptions for blocks, logs, and transactions." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.ws.port}
@@ -292,7 +364,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Metrics Port</label>
+              <label>
+                Metrics Port
+                <HelpTooltip content="Prometheus metrics endpoint. Default: 6070. Exposes L2 node performance, sync status, and health metrics." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.metrics.port}
@@ -309,7 +384,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Sequencer Feed Port</label>
+              <label>
+                Sequencer Feed Port
+                <HelpTooltip content="Sequencer feed WebSocket port. Default: 9642. Receives real-time L2 transaction data from Arbitrum sequencer for faster sync." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.p2p.port}
@@ -336,7 +414,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           />
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>Parent Chain URL (L1 Ethereum RPC)</label>
+              <label>
+                Parent Chain URL (L1 Ethereum RPC)
+                <HelpTooltip content="Ethereum L1 RPC endpoint URL. Required for state verification and batch reading. Use archive node for validators, full node sufficient for watchtower." />
+              </label>
               <input
                 type="text"
                 value={config.config.parentChainUrl}
@@ -348,7 +429,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Prune Mode</label>
+              <label>
+                Prune Mode
+                <HelpTooltip content="State retention policy. Full: Recent state only (recommended). Validator: Optimized for validation. Archive: Complete historical state." />
+              </label>
               <select
                 value={config.config.pruneMode}
                 onChange={(e) => setConfig({
@@ -362,7 +446,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               </select>
             </div>
             <div className="form-group">
-              <label>HTTP API</label>
+              <label>
+                HTTP API
+                <HelpTooltip content="Comma-separated list of RPC APIs available over HTTP. Common: eth, net, web3, arb. Limit exposed APIs in production for security." />
+              </label>
               <input
                 type="text"
                 value={config.config.httpApi}
@@ -373,7 +460,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>WebSocket API</label>
+              <label>
+                WebSocket API
+                <HelpTooltip content="Comma-separated list of RPC APIs available over WebSocket. Enables real-time L2 event subscriptions. Common: eth, net, web3, arb." />
+              </label>
               <input
                 type="text"
                 value={config.config.wsApi}
@@ -384,7 +474,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Max Peers</label>
+              <label>
+                Max Peers
+                <HelpTooltip content="Maximum number of P2P network peers. Higher values improve network connectivity but increase bandwidth usage. Default: 50." />
+              </label>
               <input
                 type="number"
                 value={config.config.p2pMaxPeers}
@@ -395,7 +488,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Log Level</label>
+              <label>
+                Log Level
+                <HelpTooltip content="Logging verbosity. Info: Standard production logging. Debug/Trace: Detailed troubleshooting. Warn/Error: Minimal logging for production." />
+              </label>
               <select
                 value={config.config.logLevel}
                 onChange={(e) => setConfig({
@@ -421,7 +517,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           />
           <div className="form-grid two-columns">
             <div className="form-group">
-              <label>CPU Requests</label>
+              <label>
+                CPU Requests
+                <HelpTooltip content={getCpuTooltip()} />
+              </label>
               <input
                 type="text"
                 value={config.resources.requests.cpu}
@@ -435,7 +534,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Memory Requests</label>
+              <label>
+                Memory Requests
+                <HelpTooltip content={getMemoryTooltip()} />
+              </label>
               <input
                 type="text"
                 value={config.resources.requests.memory}
@@ -472,7 +574,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               </label>
             </div>
             <div className="form-group">
-              <label>Storage Class</label>
+              <label>
+                Storage Class
+                <HelpTooltip content="Kubernetes StorageClass name for provisioning. Examples: local-path, gp3, premium-ssd. NVMe SSD required for Arbitrum due to high I/O demands." />
+              </label>
               <input
                 type="text"
                 value={config.persistence.storageClass}
@@ -483,7 +588,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Size</label>
+              <label>
+                Size
+                <HelpTooltip content={getStorageTooltip()} />
+              </label>
               <input
                 type="text"
                 value={config.persistence.size}
@@ -517,7 +625,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
           </div>
           {config.snapshot?.enabled && (
             <div className="form-group">
-              <label>Snapshot URL</label>
+              <label>
+                Snapshot URL
+                <HelpTooltip content="URL to L2 snapshot download. Note: Official snapshot service discontinued May 2024. Community snapshots may be available, verify checksums." />
+              </label>
               <input
                 type="text"
                 value={config.snapshot.url || ''}
@@ -578,7 +689,10 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
             </div>
             {config.config.stakerEnable && (
               <div className="form-group">
-                <label>Staker Strategy</label>
+                <label>
+                  Staker Strategy
+                  <HelpTooltip content="Validator assertion strategy. Defensive: Only dispute invalid states (recommended). StakeLatest: Always stake on latest assertion. Requires L1 gas for staking." />
+                </label>
                 <select
                   value={config.config.stakerStrategy || 'Defensive'}
                   onChange={(e) => setConfig({

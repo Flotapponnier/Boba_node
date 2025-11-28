@@ -225,6 +225,54 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
     }
   };
 
+  // Get context-aware CPU tooltip based on node type
+  const getCpuTooltip = () => {
+    switch (config.nodeType) {
+      case 'fast':
+        return 'CPU cores reserved for fast node. Use whole numbers (16) or millicores (16000m). Fast nodes: 16 cores recommended for high-performance RPC.';
+      case 'full':
+        return 'CPU cores reserved for full node. Use whole numbers (16) or millicores (16000m). Full nodes: 16 cores for complete validation.';
+      case 'archive':
+        return 'CPU cores reserved for archive node. Use whole numbers (32) or millicores (32000m). Archive nodes: 32+ cores required for historical state queries.';
+      case 'validator':
+        return 'CPU cores reserved for validator node. Use whole numbers (16) or millicores (16000m). Validators: 16+ cores for block production and consensus.';
+      default:
+        return 'CPU cores reserved for the node.';
+    }
+  };
+
+  // Get context-aware memory tooltip based on node type
+  const getMemoryTooltip = () => {
+    switch (config.nodeType) {
+      case 'fast':
+        return 'RAM reserved for fast node. Use Gi (gibibytes) or Mi (mebibytes). Fast nodes: 32-64Gi for high-performance operation.';
+      case 'full':
+        return 'RAM reserved for full node. Use Gi (gibibytes) or Mi (mebibytes). Full nodes: 64Gi for complete validation.';
+      case 'archive':
+        return 'RAM reserved for archive node. Use Gi (gibibytes) or Mi (mebibytes). Archive nodes: 128Gi+ for historical state storage.';
+      case 'validator':
+        return 'RAM reserved for validator node. Use Gi (gibibytes) or Mi (mebibytes). Validators: 64Gi+ for reliable block production.';
+      default:
+        return 'RAM reserved for the node.';
+    }
+  };
+
+  // Get context-aware storage tooltip based on node type
+  const getStorageTooltip = () => {
+    switch (config.nodeType) {
+      case 'fast':
+        return 'Disk space for fast node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
+      case 'full':
+        return 'Disk space for full node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
+      case 'archive':
+        return 'Disk space for archive node blockchain data. 10Ti+ required for complete historical state. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
+      case 'validator':
+        return 'Disk space for validator node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory for validators.';
+      default:
+        return 'Disk space for blockchain data.';
+    }
+  };
+
   return (
     <div className="config-page-container">
       <div className="config-page-header">
@@ -300,7 +348,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           />
           <div className="form-grid three-columns">
             <div className="form-group">
-              <label>Repository</label>
+              <label>
+                Repository
+                <HelpTooltip content="Docker image repository. Default: ghcr.io/bnb-chain/bsc for official BNB Chain images." />
+              </label>
               <input
                 type="text"
                 value={config.image.repository}
@@ -308,7 +359,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Tag</label>
+              <label>
+                Tag
+                <HelpTooltip content="Image version tag. Always verify the latest stable version from BNB Chain releases before deploying." />
+              </label>
               <input
                 type="text"
                 value={config.image.tag}
@@ -316,7 +370,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Pull Policy</label>
+              <label>
+                Pull Policy
+                <HelpTooltip content="When to pull the image. IfNotPresent: Use cached image. Always: Pull on every restart. Never: Only use local image." />
+              </label>
               <select
                 value={config.image.pullPolicy}
                 onChange={(e) => handleChange('image.pullPolicy', e.target.value)}
@@ -353,7 +410,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           <h3>Ports</h3>
           <div className="form-grid four-columns">
             <div className="form-group">
-              <label>HTTP Port</label>
+              <label>
+                HTTP Port
+                <HelpTooltip content="HTTP JSON-RPC API port. Default: 8545. Used for eth_call, eth_sendTransaction, etc." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.http.port}
@@ -361,7 +421,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>WebSocket Port</label>
+              <label>
+                WebSocket Port
+                <HelpTooltip content="WebSocket RPC port. Default: 8546. Enables real-time subscriptions for new blocks, logs, etc." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.ws.port}
@@ -369,7 +432,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>Metrics Port</label>
+              <label>
+                Metrics Port
+                <HelpTooltip content="Prometheus metrics endpoint. Default: 6060. Exposes node performance and health metrics." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.metrics.port}
@@ -377,7 +443,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               />
             </div>
             <div className="form-group">
-              <label>P2P Port</label>
+              <label>
+                P2P Port
+                <HelpTooltip content="Peer-to-peer network port. Default: 30303. Used for node discovery and blockchain synchronization." />
+              </label>
               <input
                 type="number"
                 value={config.service.ports.p2p.port}
@@ -498,25 +567,25 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
             <div className="form-group">
               <label>
                 CPU Requests
-                <HelpTooltip content="CPU cores reserved for the node. Use whole numbers (8) or millicores (4000m). Fast node: 8-16 cores, Archive: 32+ cores." />
+                <HelpTooltip content={getCpuTooltip()} />
               </label>
               <input
                 type="text"
                 value={config.resources.requests.cpu}
                 onChange={(e) => handleChange('resources.requests.cpu', e.target.value)}
-                placeholder="e.g., 8, 4000m"
+                placeholder="e.g., 16, 16000m"
               />
             </div>
             <div className="form-group">
               <label>
                 Memory Requests
-                <HelpTooltip content="RAM reserved for the node. Use Gi (gibibytes) or Mi (mebibytes). Fast node: 32-64Gi, Full: 64Gi, Archive: 128Gi+." />
+                <HelpTooltip content={getMemoryTooltip()} />
               </label>
               <input
                 type="text"
                 value={config.resources.requests.memory}
                 onChange={(e) => handleChange('resources.requests.memory', e.target.value)}
-                placeholder="e.g., 64Gi, 32768Mi"
+                placeholder="e.g., 64Gi, 65536Mi"
               />
             </div>
           </div>
@@ -557,13 +626,13 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               <div className="form-group">
                 <label>
                   Size
-                  <HelpTooltip content="Disk space for blockchain data. Fast/Full: 3Ti minimum, Archive: 10Ti+. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended." />
+                  <HelpTooltip content={getStorageTooltip()} />
                 </label>
                 <input
                   type="text"
                   value={config.persistence.size}
                   onChange={(e) => handleChange('persistence.size', e.target.value)}
-                  placeholder="e.g., 3Ti, 1000Gi"
+                  placeholder="e.g., 3Ti, 3072Gi"
                 />
               </div>
             </div>
@@ -597,7 +666,10 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           </div>
           {config.snapshot?.enabled && (
             <div className="form-group">
-              <label>Snapshot URL</label>
+              <label>
+                Snapshot URL
+                <HelpTooltip content="URL to download blockchain snapshot. Official snapshots available from BNB Chain. Verify checksum before use." />
+              </label>
               <input
                 type="text"
                 value={config.snapshot.url || ''}
