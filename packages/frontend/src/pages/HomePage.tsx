@@ -26,10 +26,10 @@ const nodes: NodeCard[] = [
   {
     id: 'ethereum',
     name: 'Ethereum Node',
-    description: 'Ethereum Full Node - Coming soon',
+    description: 'Ethereum Geth Node - Optimized for mainnet deployment',
     image: ethereumImage,
-    available: false,
-    route: '/ethereum',
+    available: true,
+    route: '/eth',
   },
   {
     id: 'arbitrum',

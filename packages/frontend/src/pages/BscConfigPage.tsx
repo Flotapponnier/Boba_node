@@ -114,7 +114,7 @@ function BscConfigPage() {
 
   const loadNodeTypePreset = async (nodeType: string) => {
     try {
-      const response = await axios.get(`/api/presets/${nodeType}`);
+      const response = await axios.get(`/api/presets/bsc/${nodeType}`);
       const preset = response.data;
 
       if (config) {
