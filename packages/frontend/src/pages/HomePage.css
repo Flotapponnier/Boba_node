@@ -78,7 +78,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .node-card::before {
@@ -171,6 +171,27 @@
 
 .footer p {
   margin: 0.25rem 0;
+}
+
+.github-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.github-link:hover {
+  color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+}
+
+.github-link svg {
+  transition: transform 0.3s ease;
+}
+
+.github-link:hover svg {
+  transform: rotate(360deg);
 }
 
 .back-button-header {

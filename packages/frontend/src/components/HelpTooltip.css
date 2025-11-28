@@ -3,6 +3,7 @@
   display: inline-block;
   margin-left: 8px;
   vertical-align: middle;
+  overflow: visible;
 }
 
 .help-tooltip-icon {
@@ -32,12 +33,14 @@
   font-size: 0.85rem;
   line-height: 1.4;
   white-space: normal;
-  max-width: 300px;
+  width: max-content;
+  max-width: 350px;
   min-width: 200px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  z-index: 10000;
   pointer-events: none;
   animation: tooltipFadeIn 0.2s ease;
+  word-wrap: break-word;
 }
 
 .help-tooltip-bubble::after {

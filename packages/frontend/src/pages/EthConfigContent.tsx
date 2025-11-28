@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { EthConfig, DEFAULT_ETH_CONFIG, EthNodeType } from '../types/ethConfig';
 import HelpTooltip from '../components/HelpTooltip';
 import SectionHeader from '../components/SectionHeader';
+import ResourcesSection from '../components/sections/eth/ResourcesSection';
+import PersistenceSection from '../components/sections/eth/PersistenceSection';
+import SnapshotSection from '../components/sections/eth/SnapshotSection';
+import MonitoringSection from '../components/sections/eth/MonitoringSection';
+import ValidatorSection from '../components/sections/eth/ValidatorSection';
+import {
+  getDocUrl,
+  getNodeDescription,
+} from '../utils/nodeTypeHelpers';
 import '../styles/common.css';
 
 interface EthConfigContentProps {
@@ -13,6 +22,23 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Helper function to handle nested path updates
+  const handleConfigChange = (path: string, value: any) => {
+    const keys = path.split('.');
+    setConfig(prev => {
+      const newConfig = { ...prev };
+      let current: any = newConfig;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = value;
+      return newConfig;
+    });
+  };
 
   // Load default config and preset from backend
   useEffect(() => {
@@ -92,93 +118,15 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
     return <div className="loading">Loading configuration...</div>;
   }
 
-  // Get documentation URL based on node type
-  const getDocUrl = () => {
-    switch (config.nodeType) {
-      case 'light':
-        return 'https://geth.ethereum.org/docs/fundamentals/light-clients';
-      case 'archive':
-        return 'https://geth.ethereum.org/docs/fundamentals/archive-nodes';
-      case 'validator':
-        return 'https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/';
-      case 'full':
-      default:
-        return 'https://geth.ethereum.org/docs/getting-started/consensus-clients';
-    }
-  };
-
-  // Get node description based on type
-  const getNodeDescription = () => {
-    switch (config.nodeType) {
-      case 'light':
-        return 'Downloads block headers only for minimal resource usage. Suitable for lightweight applications and mobile wallets requiring basic blockchain interaction without full validation.';
-      case 'full':
-        return 'Validates all blocks with snap sync, keeping recent state. Recommended for most applications requiring reliable RPC access, smart contract deployment, and transaction broadcasting.';
-      case 'archive':
-        return 'Maintains complete historical state from genesis. Essential for block explorers, analytics platforms, and applications requiring historical state queries at any block height.';
-      case 'validator':
-        return 'Participates in Proof-of-Stake consensus with block proposals and attestations. Requires 32 ETH stake, consensus client, and high uptime. Earns staking rewards and transaction fees.';
-      default:
-        return 'Configure and deploy your Ethereum node to Kubernetes';
-    }
-  };
-
-  // Get context-aware CPU tooltip based on node type
-  const getCpuTooltip = () => {
-    switch (config.nodeType) {
-      case 'light':
-        return 'CPU cores reserved for light node. Use whole numbers (2) or millicores (2000m). Light nodes: 2-4 cores for header-only sync.';
-      case 'full':
-        return 'CPU cores reserved for full node. Use whole numbers (8) or millicores (8000m). Full nodes: 8-16 cores recommended for snap sync and validation.';
-      case 'archive':
-        return 'CPU cores reserved for archive node. Use whole numbers (16) or millicores (16000m). Archive nodes: 16-32 cores required for historical state queries.';
-      case 'validator':
-        return 'CPU cores reserved for validator node. Use whole numbers (8) or millicores (8000m). Validators: 8+ cores for block proposals and attestations.';
-      default:
-        return 'CPU cores reserved for the node.';
-    }
-  };
-
-  // Get context-aware memory tooltip based on node type
-  const getMemoryTooltip = () => {
-    switch (config.nodeType) {
-      case 'light':
-        return 'RAM reserved for light node. Use Gi (gibibytes) or Mi (mebibytes). Light nodes: 4-8Gi for minimal resource usage.';
-      case 'full':
-        return 'RAM reserved for full node. Use Gi (gibibytes) or Mi (mebibytes). Full nodes: 16-32Gi for snap sync and recent state.';
-      case 'archive':
-        return 'RAM reserved for archive node. Use Gi (gibibytes) or Mi (mebibytes). Archive nodes: 64Gi+ for complete historical state.';
-      case 'validator':
-        return 'RAM reserved for validator node. Use Gi (gibibytes) or Mi (mebibytes). Validators: 32Gi+ for consensus participation.';
-      default:
-        return 'RAM reserved for the node.';
-    }
-  };
-
-  // Get context-aware storage tooltip based on node type
-  const getStorageTooltip = () => {
-    switch (config.nodeType) {
-      case 'light':
-        return 'Disk space for light node data. 100Gi minimum for headers. Use Ti (tebibytes) or Gi (gibibytes). SSD recommended.';
-      case 'full':
-        return 'Disk space for full node blockchain data. 2Ti minimum (grows ~14GB/week). Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
-      case 'archive':
-        return 'Disk space for archive node blockchain data. 12-20Ti+ required for complete history. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
-      case 'validator':
-        return 'Disk space for validator node data. 2Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory for validators.';
-      default:
-        return 'Disk space for blockchain data.';
-    }
-  };
 
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>Ethereum {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
-        <p>{getNodeDescription()}</p>
+        <p>{getNodeDescription('eth', config.nodeType)}</p>
         <div className="doc-link-container">
           <a
-            href={getDocUrl()}
+            href={getDocUrl('eth', config.nodeType)}
             target="_blank"
             rel="noopener noreferrer"
             className="doc-link"
@@ -548,238 +496,37 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
         </div>
 
         {/* Resources */}
-        <div className="config-section">
-          <SectionHeader
-            title="Resources"
-            tooltip="Kubernetes resource allocation for your Ethereum node. Requests guarantee minimum resources. For Ethereum mainnet: Light nodes need 2-4 cores and 4-8GB RAM, Full nodes require 8-16 cores and 16-32GB RAM, Archive nodes need 16-32 cores and 64GB+ RAM."
-          />
-          <div className="form-grid two-columns">
-            <div className="form-group">
-              <label>
-                CPU Requests
-                <HelpTooltip content={getCpuTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.resources.requests.cpu}
-                onChange={(e) => setConfig({
-                  ...config,
-                  resources: {
-                    ...config.resources,
-                    requests: { ...config.resources.requests, cpu: e.target.value }
-                  }
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label>
-                Memory Requests
-                <HelpTooltip content={getMemoryTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.resources.requests.memory}
-                onChange={(e) => setConfig({
-                  ...config,
-                  resources: {
-                    ...config.resources,
-                    requests: { ...config.resources.requests, memory: e.target.value }
-                  }
-                })}
-              />
-            </div>
-          </div>
-        </div>
+        <ResourcesSection
+          resources={config.resources}
+          nodeType={config.nodeType}
+          onChange={handleConfigChange}
+        />
 
         {/* Persistence */}
-        <div className="config-section">
-          <SectionHeader
-            title="Storage"
-            tooltip="Persistent volume configuration for blockchain data. Essential for production - ensures data persists across pod restarts. Ethereum mainnet requires fast SSD storage: Full nodes need 2TB minimum, Archive nodes require 12-20TB+. Database grows ~14GB per week."
-          />
-          <div className="form-grid three-columns">
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={config.persistence.enabled}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    persistence: { ...config.persistence, enabled: e.target.checked }
-                  })}
-                />
-                Enable Persistent Volume
-              </label>
-            </div>
-            <div className="form-group">
-              <label>
-                Storage Class
-                <HelpTooltip content="Kubernetes StorageClass name for provisioning. Examples: local-path, gp3, premium-ssd. Must support the required disk size and IOPS." />
-              </label>
-              <input
-                type="text"
-                value={config.persistence.storageClass}
-                onChange={(e) => setConfig({
-                  ...config,
-                  persistence: { ...config.persistence, storageClass: e.target.value }
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label>
-                Size
-                <HelpTooltip content={getStorageTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.persistence.size}
-                onChange={(e) => setConfig({
-                  ...config,
-                  persistence: { ...config.persistence, size: e.target.value }
-                })}
-              />
-            </div>
-          </div>
-        </div>
+        <PersistenceSection
+          persistence={config.persistence}
+          nodeType={config.nodeType}
+          onChange={handleConfigChange}
+        />
 
         {/* Snapshot Download */}
-        <div className="config-section">
-          <SectionHeader
-            title="Snapshot Download"
-            tooltip="Pre-synced blockchain snapshot for faster initial synchronization. Reduces sync time from weeks to hours/days. Ethereum mainnet snapshots are 600GB+ compressed. Ensure sufficient bandwidth and temporary storage for download and extraction."
-          />
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={config.snapshot?.enabled || false}
-                onChange={(e) => setConfig({
-                  ...config,
-                  snapshot: { enabled: e.target.checked, url: config.snapshot?.url, checksum: config.snapshot?.checksum }
-                })}
-              />
-              Enable snapshot download for faster initial sync
-            </label>
-          </div>
-          {config.snapshot?.enabled && (
-            <div className="form-group">
-              <label>
-                Snapshot URL
-                <HelpTooltip content="URL to download blockchain snapshot. Use trusted sources only. Snapshots are large (600GB+ compressed) and reduce initial sync time significantly." />
-              </label>
-              <input
-                type="text"
-                value={config.snapshot.url || ''}
-                onChange={(e) => setConfig({
-                  ...config,
-                  snapshot: { enabled: true, url: e.target.value, checksum: config.snapshot?.checksum }
-                })}
-                placeholder="https://example.com/eth-snapshot.tar.gz"
-              />
-            </div>
-          )}
-        </div>
+        <SnapshotSection
+          snapshot={config.snapshot}
+          onChange={handleConfigChange}
+        />
 
         {/* Monitoring */}
-        <div className="config-section">
-          <SectionHeader
-            title="Monitoring Stack"
-            tooltip="Prometheus and Grafana integration for comprehensive node monitoring. Tracks sync status, peer count, block processing, gas usage, transaction pool, and system resources. Critical for production operations and troubleshooting."
-          />
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={config.monitoring?.enabled || false}
-                onChange={(e) => setConfig({
-                  ...config,
-                  monitoring: {
-                    enabled: e.target.checked,
-                    prometheusOperator: config.monitoring?.prometheusOperator ?? true,
-                    grafanaDashboard: config.monitoring?.grafanaDashboard ?? true,
-                    serviceMonitor: config.monitoring?.serviceMonitor
-                  }
-                })}
-              />
-              Enable Prometheus metrics and Grafana dashboard
-            </label>
-          </div>
-        </div>
+        <MonitoringSection
+          monitoring={config.monitoring}
+          onChange={handleConfigChange}
+        />
 
         {/* Validator Configuration */}
         {config.nodeType === 'validator' && (
-          <div className="config-section">
-            <SectionHeader
-              title="Validator Configuration"
-              tooltip="Ethereum Proof-of-Stake validator settings. Requires running both execution client (Geth) and consensus client (Prysm, Lighthouse, etc.) together. Validators need 32 ETH stake. Fee recipient address receives transaction tips and MEV rewards."
-            />
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={config.validator?.enabled || false}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    validator: {
-                      enabled: e.target.checked,
-                      consensusClient: config.validator?.consensusClient ?? 'prysm',
-                      feeRecipient: config.validator?.feeRecipient,
-                      graffiti: config.validator?.graffiti
-                    }
-                  })}
-                />
-                Enable validator mode (requires consensus client)
-              </label>
-            </div>
-            {config.validator?.enabled && (
-              <>
-                <div className="form-group">
-                  <label>
-                    Consensus Client
-                    <HelpTooltip content="Consensus layer client for validator. Each has different resource requirements and features. Client diversity is important for network health." />
-                  </label>
-                  <select
-                    value={config.validator?.consensusClient || 'prysm'}
-                    onChange={(e) => setConfig({
-                      ...config,
-                      validator: {
-                        enabled: true,
-                        consensusClient: e.target.value as any,
-                        feeRecipient: config.validator?.feeRecipient,
-                        graffiti: config.validator?.graffiti
-                      }
-                    })}
-                  >
-                    <option value="prysm">Prysm</option>
-                    <option value="lighthouse">Lighthouse</option>
-                    <option value="teku">Teku</option>
-                    <option value="nimbus">Nimbus</option>
-                    <option value="lodestar">Lodestar</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>
-                    Fee Recipient Address
-                    <HelpTooltip content="Ethereum address to receive transaction priority fees and MEV rewards. Must be a valid Ethereum address starting with 0x." />
-                  </label>
-                  <input
-                    type="text"
-                    value={config.validator?.feeRecipient || ''}
-                    onChange={(e) => setConfig({
-                      ...config,
-                      validator: {
-                        enabled: true,
-                        consensusClient: config.validator?.consensusClient || 'prysm',
-                        feeRecipient: e.target.value,
-                        graffiti: config.validator?.graffiti
-                      }
-                    })}
-                    placeholder="0x..."
-                  />
-                </div>
-              </>
-            )}
-          </div>
+          <ValidatorSection
+            validator={config.validator}
+            onChange={handleConfigChange}
+          />
         )}
 
         <button type="submit" className="button-primary">Generate Helm Chart</button>

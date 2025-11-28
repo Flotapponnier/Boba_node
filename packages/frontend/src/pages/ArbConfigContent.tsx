@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { ArbConfig, DEFAULT_ARB_CONFIG, ArbNodeType } from '../types/arbConfig';
 import HelpTooltip from '../components/HelpTooltip';
 import SectionHeader from '../components/SectionHeader';
+import ResourcesSection from '../components/sections/arb/ResourcesSection';
+import PersistenceSection from '../components/sections/arb/PersistenceSection';
+import SnapshotSection from '../components/sections/arb/SnapshotSection';
+import MonitoringSection from '../components/sections/arb/MonitoringSection';
+import ValidatorSection from '../components/sections/arb/ValidatorSection';
 import '../styles/common.css';
 
 interface ArbConfigContentProps {
@@ -13,6 +18,23 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Helper function to handle nested path updates
+  const handleConfigChange = (path: string, value: any) => {
+    const keys = path.split('.');
+    setConfig(prev => {
+      const newConfig = { ...prev };
+      let current: any = newConfig;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = value;
+      return newConfig;
+    });
+  };
 
   // Load default config and preset from backend
   useEffect(() => {
@@ -116,48 +138,6 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
         return 'Verifies L2 state correctness and can post assertions to L1. Watchtower mode monitors for fraud. Active validation requires allow-listing on mainnet. Essential for network security and dispute resolution.';
       default:
         return 'Configure and deploy your Arbitrum Nitro node to Kubernetes';
-    }
-  };
-
-  // Get context-aware CPU tooltip based on node type
-  const getCpuTooltip = () => {
-    switch (config.nodeType) {
-      case 'full':
-        return 'CPU cores reserved for full node. Use whole numbers (4) or millicores (4000m). Full nodes: 4-core minimum, single-core performance matters for Nitro.';
-      case 'archive':
-        return 'CPU cores reserved for archive node. Use whole numbers (4) or millicores (4000m). Archive nodes: 4-core minimum, high single-core performance for historical queries.';
-      case 'validator':
-        return 'CPU cores reserved for validator node. Use whole numbers (4) or millicores (4000m). Validators: 4-core minimum for state verification and L1 monitoring.';
-      default:
-        return 'CPU cores reserved for the node.';
-    }
-  };
-
-  // Get context-aware memory tooltip based on node type
-  const getMemoryTooltip = () => {
-    switch (config.nodeType) {
-      case 'full':
-        return 'RAM reserved for full node. Use Gi (gibibytes) or Mi (mebibytes). Full nodes: 16Gi minimum for pruned L2 state and watchtower mode.';
-      case 'archive':
-        return 'RAM reserved for archive node. Use Gi (gibibytes) or Mi (mebibytes). Archive nodes: 16Gi+ for complete historical L2 state.';
-      case 'validator':
-        return 'RAM reserved for validator node. Use Gi (gibibytes) or Mi (mebibytes). Validators: 16Gi+ for state verification and assertion posting.';
-      default:
-        return 'RAM reserved for the node.';
-    }
-  };
-
-  // Get context-aware storage tooltip based on node type
-  const getStorageTooltip = () => {
-    switch (config.nodeType) {
-      case 'full':
-        return 'Disk space for full node L2 data. 2Ti minimum (Arb One: ~560GB + 200GB/month growth). Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
-      case 'archive':
-        return 'Disk space for archive node L2 data. 12Ti+ required (Arb One: ~9.7TB + 850GB/month growth). Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
-      case 'validator':
-        return 'Disk space for validator node data. 2Ti minimum recommended for L2 state and L1 monitoring. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
-      default:
-        return 'Disk space for blockchain data.';
     }
   };
 
@@ -510,204 +490,38 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
         </div>
 
         {/* Resources */}
-        <div className="config-section">
-          <SectionHeader
-            title="Resources"
-            tooltip="Kubernetes resource allocation for Arbitrum Nitro node. Minimum requirements: 4-core CPU (single-core performance matters), 16GB RAM. Full nodes need 2TB storage, Archive nodes require 12TB+ for Arbitrum One. Storage grows ~850GB/month for Arb One."
-          />
-          <div className="form-grid two-columns">
-            <div className="form-group">
-              <label>
-                CPU Requests
-                <HelpTooltip content={getCpuTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.resources.requests.cpu}
-                onChange={(e) => setConfig({
-                  ...config,
-                  resources: {
-                    ...config.resources,
-                    requests: { ...config.resources.requests, cpu: e.target.value }
-                  }
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label>
-                Memory Requests
-                <HelpTooltip content={getMemoryTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.resources.requests.memory}
-                onChange={(e) => setConfig({
-                  ...config,
-                  resources: {
-                    ...config.resources,
-                    requests: { ...config.resources.requests, memory: e.target.value }
-                  }
-                })}
-              />
-            </div>
-          </div>
-        </div>
+        <ResourcesSection
+          resources={config.resources}
+          nodeType={config.nodeType}
+          onChange={handleConfigChange}
+        />
 
         {/* Persistence */}
-        <div className="config-section">
-          <SectionHeader
-            title="Storage"
-            tooltip="Persistent storage for Arbitrum blockchain data. NVMe SSDs strongly recommended due to high I/O requirements. Arbitrum One: 560GB pruned (grows 200GB/month), Nova: 400GB pruned (grows 1.6TB/month). Archive nodes need significantly more."
-          />
-          <div className="form-grid three-columns">
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={config.persistence.enabled}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    persistence: { ...config.persistence, enabled: e.target.checked }
-                  })}
-                />
-                Enable Persistent Volume
-              </label>
-            </div>
-            <div className="form-group">
-              <label>
-                Storage Class
-                <HelpTooltip content="Kubernetes StorageClass name for provisioning. Examples: local-path, gp3, premium-ssd. NVMe SSD required for Arbitrum due to high I/O demands." />
-              </label>
-              <input
-                type="text"
-                value={config.persistence.storageClass}
-                onChange={(e) => setConfig({
-                  ...config,
-                  persistence: { ...config.persistence, storageClass: e.target.value }
-                })}
-              />
-            </div>
-            <div className="form-group">
-              <label>
-                Size
-                <HelpTooltip content={getStorageTooltip()} />
-              </label>
-              <input
-                type="text"
-                value={config.persistence.size}
-                onChange={(e) => setConfig({
-                  ...config,
-                  persistence: { ...config.persistence, size: e.target.value }
-                })}
-              />
-            </div>
-          </div>
-        </div>
+        <PersistenceSection
+          persistence={config.persistence}
+          nodeType={config.nodeType}
+          onChange={handleConfigChange}
+        />
 
         {/* Snapshot Download */}
-        <div className="config-section">
-          <SectionHeader
-            title="Snapshot Download"
-            tooltip="Pre-synced Arbitrum blockchain snapshot for faster node initialization. Note: As of May 2024, official snapshot service discontinued due to rapid state growth. Community snapshots may be available. Verify checksum if provided."
-          />
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={config.snapshot?.enabled || false}
-                onChange={(e) => setConfig({
-                  ...config,
-                  snapshot: { enabled: e.target.checked, url: config.snapshot?.url, checksum: config.snapshot?.checksum }
-                })}
-              />
-              Enable snapshot download for faster initial sync
-            </label>
-          </div>
-          {config.snapshot?.enabled && (
-            <div className="form-group">
-              <label>
-                Snapshot URL
-                <HelpTooltip content="URL to L2 snapshot download. Note: Official snapshot service discontinued May 2024. Community snapshots may be available, verify checksums." />
-              </label>
-              <input
-                type="text"
-                value={config.snapshot.url || ''}
-                onChange={(e) => setConfig({
-                  ...config,
-                  snapshot: { enabled: true, url: e.target.value, checksum: config.snapshot?.checksum }
-                })}
-                placeholder="https://snapshot.arbitrum.foundation/arb1/nitro-pruned.tar"
-              />
-            </div>
-          )}
-        </div>
+        <SnapshotSection
+          snapshot={config.snapshot}
+          onChange={handleConfigChange}
+        />
 
         {/* Monitoring */}
-        <div className="config-section">
-          <SectionHeader
-            title="Monitoring Stack"
-            tooltip="Prometheus metrics and Grafana dashboards for Arbitrum node monitoring. Tracks L2 sync progress, sequencer feed connection, batch posting, parent chain connectivity, and resource utilization. Essential for production L2 operations."
-          />
-          <div className="form-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={config.monitoring?.enabled || false}
-                onChange={(e) => setConfig({
-                  ...config,
-                  monitoring: {
-                    enabled: e.target.checked,
-                    prometheusOperator: config.monitoring?.prometheusOperator ?? true,
-                    grafanaDashboard: config.monitoring?.grafanaDashboard ?? true,
-                  }
-                })}
-              />
-              Enable Prometheus metrics and Grafana dashboard
-            </label>
-          </div>
-        </div>
+        <MonitoringSection
+          monitoring={config.monitoring}
+          onChange={handleConfigChange}
+        />
 
         {/* Validator Configuration */}
         {config.nodeType === 'validator' && (
-          <div className="config-section">
-            <SectionHeader
-              title="Validator Configuration"
-              tooltip="Arbitrum validator/staker configuration. Validators verify L2 state against L1. Watchtower mode (enabled by default) monitors for invalid states. Staker strategies determine asserting behavior. Note: Mainnet validators require allow-listing."
-            />
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={config.config.stakerEnable}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    config: { ...config.config, stakerEnable: e.target.checked }
-                  })}
-                />
-                Enable staker/validator mode
-              </label>
-            </div>
-            {config.config.stakerEnable && (
-              <div className="form-group">
-                <label>
-                  Staker Strategy
-                  <HelpTooltip content="Validator assertion strategy. Defensive: Only dispute invalid states (recommended). StakeLatest: Always stake on latest assertion. Requires L1 gas for staking." />
-                </label>
-                <select
-                  value={config.config.stakerStrategy || 'Defensive'}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    config: { ...config.config, stakerStrategy: e.target.value as any }
-                  })}
-                >
-                  <option value="Defensive">Defensive</option>
-                  <option value="MakeNodes">MakeNodes</option>
-                  <option value="ResolveNodes">ResolveNodes</option>
-                  <option value="StakeLatest">StakeLatest</option>
-                </select>
-              </div>
-            )}
-          </div>
+          <ValidatorSection
+            stakerEnable={config.config.stakerEnable}
+            stakerStrategy={config.config.stakerStrategy}
+            onChange={handleConfigChange}
+          />
         )}
 
         <button type="submit" className="button-primary">Generate Helm Chart</button>

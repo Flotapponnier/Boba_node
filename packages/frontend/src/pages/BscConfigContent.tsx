@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import HelpTooltip from '../components/HelpTooltip';
 import SectionHeader from '../components/SectionHeader';
+import {
+  getDocUrl,
+  getNodeDescription,
+  getCpuTooltip,
+  getMemoryTooltip,
+  getStorageTooltip,
+  getChainDisplayName
+} from '../utils/nodeTypeHelpers';
 import '../styles/common.css';
 
 interface BscConfig {
@@ -201,86 +209,15 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
     );
   }
 
-  // Get documentation URL based on node type
-  const getDocUrl = () => {
-    if (config.nodeType === 'validator') {
-      return 'https://docs.bnbchain.org/bnb-smart-chain/validator/run-val/';
-    }
-    return 'https://docs.bnbchain.org/bnb-smart-chain/developers/node_operators/full_node/';
-  };
-
-  // Get node description based on type
-  const getNodeDescription = () => {
-    switch (config.nodeType) {
-      case 'fast':
-        return 'Optimized for high-performance RPC with minimal state verification. Ideal for applications requiring fast query responses with reduced resource overhead.';
-      case 'full':
-        return 'Complete blockchain validation with full state verification. Recommended for most production use cases requiring reliable RPC services and data integrity.';
-      case 'archive':
-        return 'Stores complete historical state from genesis block. Required for applications needing historical data queries, analytics platforms, and block explorers.';
-      case 'validator':
-        return 'Block production and consensus participation. Requires BNB stake and high availability infrastructure. Earns block rewards for securing the network.';
-      default:
-        return 'Configure your Binance Smart Chain node parameters';
-    }
-  };
-
-  // Get context-aware CPU tooltip based on node type
-  const getCpuTooltip = () => {
-    switch (config.nodeType) {
-      case 'fast':
-        return 'CPU cores reserved for fast node. Use whole numbers (16) or millicores (16000m). Fast nodes: 16 cores recommended for high-performance RPC.';
-      case 'full':
-        return 'CPU cores reserved for full node. Use whole numbers (16) or millicores (16000m). Full nodes: 16 cores for complete validation.';
-      case 'archive':
-        return 'CPU cores reserved for archive node. Use whole numbers (32) or millicores (32000m). Archive nodes: 32+ cores required for historical state queries.';
-      case 'validator':
-        return 'CPU cores reserved for validator node. Use whole numbers (16) or millicores (16000m). Validators: 16+ cores for block production and consensus.';
-      default:
-        return 'CPU cores reserved for the node.';
-    }
-  };
-
-  // Get context-aware memory tooltip based on node type
-  const getMemoryTooltip = () => {
-    switch (config.nodeType) {
-      case 'fast':
-        return 'RAM reserved for fast node. Use Gi (gibibytes) or Mi (mebibytes). Fast nodes: 32-64Gi for high-performance operation.';
-      case 'full':
-        return 'RAM reserved for full node. Use Gi (gibibytes) or Mi (mebibytes). Full nodes: 64Gi for complete validation.';
-      case 'archive':
-        return 'RAM reserved for archive node. Use Gi (gibibytes) or Mi (mebibytes). Archive nodes: 128Gi+ for historical state storage.';
-      case 'validator':
-        return 'RAM reserved for validator node. Use Gi (gibibytes) or Mi (mebibytes). Validators: 64Gi+ for reliable block production.';
-      default:
-        return 'RAM reserved for the node.';
-    }
-  };
-
-  // Get context-aware storage tooltip based on node type
-  const getStorageTooltip = () => {
-    switch (config.nodeType) {
-      case 'fast':
-        return 'Disk space for fast node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
-      case 'full':
-        return 'Disk space for full node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD strongly recommended.';
-      case 'archive':
-        return 'Disk space for archive node blockchain data. 10Ti+ required for complete historical state. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory.';
-      case 'validator':
-        return 'Disk space for validator node blockchain data. 3Ti minimum recommended. Use Ti (tebibytes) or Gi (gibibytes). NVMe SSD mandatory for validators.';
-      default:
-        return 'Disk space for blockchain data.';
-    }
-  };
 
   return (
     <div className="config-page-container">
       <div className="config-page-header">
         <h1>BSC {config.nodeType.charAt(0).toUpperCase() + config.nodeType.slice(1)} Node Configuration</h1>
-        <p>{getNodeDescription()}</p>
+        <p>{getNodeDescription('bsc', config.nodeType)}</p>
         <div className="doc-link-container">
           <a
-            href={getDocUrl()}
+            href={getDocUrl('bsc', config.nodeType)}
             target="_blank"
             rel="noopener noreferrer"
             className="doc-link"
@@ -567,7 +504,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
             <div className="form-group">
               <label>
                 CPU Requests
-                <HelpTooltip content={getCpuTooltip()} />
+                <HelpTooltip content={getCpuTooltip('bsc', config.nodeType)} />
               </label>
               <input
                 type="text"
@@ -579,7 +516,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
             <div className="form-group">
               <label>
                 Memory Requests
-                <HelpTooltip content={getMemoryTooltip()} />
+                <HelpTooltip content={getMemoryTooltip('bsc', config.nodeType)} />
               </label>
               <input
                 type="text"
@@ -626,7 +563,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
               <div className="form-group">
                 <label>
                   Size
-                  <HelpTooltip content={getStorageTooltip()} />
+                  <HelpTooltip content={getStorageTooltip('bsc', config.nodeType)} />
                 </label>
                 <input
                   type="text"
