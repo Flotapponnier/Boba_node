@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import HelpTooltip from '../components/HelpTooltip';
 import SectionHeader from '../components/SectionHeader';
+import SuccessModal from '../components/SuccessModal';
 import {
   getDocUrl,
   getNodeDescription,
@@ -141,6 +142,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Load default config and preset from backend
   useEffect(() => {
@@ -226,7 +228,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      setSuccess('Helm chart generated successfully!');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Failed to generate chart:', error);
       setError('Failed to generate chart. Please check your configuration.');
@@ -1299,6 +1301,13 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
           {generating ? 'Generating...' : 'Generate Helm Chart'}
         </button>
       </form>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        deploymentName={config.deploymentName}
+        chain="bsc"
+      />
     </div>
   );
 }

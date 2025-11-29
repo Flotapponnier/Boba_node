@@ -7,6 +7,7 @@ import PersistenceSection from '../components/sections/eth/PersistenceSection';
 import SnapshotSection from '../components/sections/eth/SnapshotSection';
 import MonitoringSection from '../components/sections/eth/MonitoringSection';
 import ValidatorSection from '../components/sections/eth/ValidatorSection';
+import SuccessModal from '../components/SuccessModal';
 import {
   getDocUrl,
   getNodeDescription,
@@ -22,6 +23,7 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Helper function to handle nested path updates
   const handleConfigChange = (path: string, value: any) => {
@@ -108,7 +110,7 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      setSuccess('Helm chart generated successfully!');
+      setShowSuccessModal(true);
     } catch (err: any) {
       setError(err.message || 'Failed to generate chart');
     }
@@ -531,6 +533,13 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
 
         <button type="submit" className="button-primary">Generate Helm Chart</button>
       </form>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        deploymentName={config.deploymentName}
+        chain="ethereum"
+      />
     </div>
   );
 }

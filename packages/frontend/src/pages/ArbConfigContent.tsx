@@ -7,6 +7,7 @@ import PersistenceSection from '../components/sections/arb/PersistenceSection';
 import SnapshotSection from '../components/sections/arb/SnapshotSection';
 import MonitoringSection from '../components/sections/arb/MonitoringSection';
 import ValidatorSection from '../components/sections/arb/ValidatorSection';
+import SuccessModal from '../components/SuccessModal';
 import '../styles/common.css';
 
 interface ArbConfigContentProps {
@@ -18,6 +19,7 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Helper function to handle nested path updates
   const handleConfigChange = (path: string, value: any) => {
@@ -104,7 +106,7 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      setSuccess('Helm chart generated successfully!');
+      setShowSuccessModal(true);
     } catch (err: any) {
       setError(err.message || 'Failed to generate chart');
     }
@@ -526,6 +528,13 @@ export default function ArbConfigContent({ nodeType }: ArbConfigContentProps) {
 
         <button type="submit" className="button-primary">Generate Helm Chart</button>
       </form>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        deploymentName={config.deploymentName}
+        chain="arbitrum"
+      />
     </div>
   );
 }

@@ -1,8 +1,8 @@
-# BSC Full Node Configuration - bsc-full
+# BSC Archive Node Configuration - bsc-archive
 replicaCount: 1
-nodeType: full
-nodeName: bsc-full-node
-namespace: bsc-full
+nodeType: archive
+nodeName: bsc-archive-node
+namespace: bsc-archive
 image:
   repository: ghcr.io/bnb-chain/bsc
   tag: v1.4.17
@@ -19,12 +19,12 @@ service:
     p2p:
       port: 30311
 config:
-  cache: 20480
-  triesVerifyMode: local
+  cache: 40960
+  triesVerifyMode: full
   historyTransactions: 0
   rpcAllowUnprotectedTxs: true
   syncMode: snap
-  gcMode: full
+  gcMode: archive
   ipcDisable: true
   verbosity: 3
   httpApi: eth,net,web3,txpool,parlia
@@ -40,11 +40,11 @@ config:
 resources:
   requests:
     cpu: '16'
-    memory: 64Gi
+    memory: 128Gi
 persistence:
   enabled: true
   storageClass: local-path
-  size: 3Ti
+  size: 10Ti
 livenessProbe:
   enabled: true
   initialDelaySeconds: 300
@@ -73,6 +73,6 @@ monitoring:
     scrapeTimeout: 10s
     prometheusRelease: kube-prometheus-stack
   alerts:
-    enabled: true
+    enabled: false
   prometheusOperator: true
   grafanaDashboard: true
