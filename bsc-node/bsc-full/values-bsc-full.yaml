@@ -1,0 +1,78 @@
+# BSC Full Node Configuration - bsc-full
+replicaCount: 1
+nodeType: full
+nodeName: bsc-full-node
+namespace: bsc-full
+image:
+  repository: ghcr.io/bnb-chain/bsc
+  tag: v1.4.17
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  ports:
+    http:
+      port: 8545
+    ws:
+      port: 8546
+    metrics:
+      port: 6060
+    p2p:
+      port: 30311
+config:
+  cache: 20480
+  triesVerifyMode: local
+  historyTransactions: 0
+  rpcAllowUnprotectedTxs: true
+  syncMode: snap
+  gcMode: full
+  ipcDisable: true
+  verbosity: 3
+  httpApi: eth,net,web3,txpool,parlia
+  wsApi: eth,net,web3
+  httpVirtualHosts: '*'
+  httpCorsOrigins: '*'
+  txpool:
+    globalslots: 20000
+    globalqueue: 10000
+    accountslots: 16
+    accountqueue: 64
+    lifetime: 3h0m0s
+resources:
+  requests:
+    cpu: '16'
+    memory: 64Gi
+persistence:
+  enabled: true
+  storageClass: local-path
+  size: 3Ti
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 300
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+monitoring:
+  enabled: true
+  gethExporter:
+    enabled: true
+    image:
+      repository: etclabscore/gethexporter
+      tag: latest
+      pullPolicy: IfNotPresent
+    rpcUrl: http://localhost:8545
+    port: 6061
+  serviceMonitor:
+    enabled: true
+    interval: 10s
+    scrapeTimeout: 10s
+    prometheusRelease: kube-prometheus-stack
+  alerts:
+    enabled: true
+  prometheusOperator: true
+  grafanaDashboard: true

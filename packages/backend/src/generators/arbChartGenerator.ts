@@ -374,7 +374,56 @@ ${config.snapshot.checksum ? `  checksum: ${config.snapshot.checksum}` : ''}` : 
 ${config.monitoring?.enabled ? `monitoring:
   enabled: true
   prometheusOperator: ${config.monitoring.prometheusOperator}
-  grafanaDashboard: ${config.monitoring.grafanaDashboard}` : ''}
+  grafanaDashboard: ${config.monitoring.grafanaDashboard}
+${config.monitoring.gethExporter?.enabled ? `  gethExporter:
+    enabled: true
+    image:
+      repository: ${config.monitoring.gethExporter.image.repository}
+      tag: ${config.monitoring.gethExporter.image.tag}
+      pullPolicy: ${config.monitoring.gethExporter.image.pullPolicy}
+    rpcUrl: ${config.monitoring.gethExporter.rpcUrl}
+    port: ${config.monitoring.gethExporter.port}` : ''}
+${config.monitoring.serviceMonitor?.enabled ? `  serviceMonitor:
+    enabled: true
+    interval: ${config.monitoring.serviceMonitor.interval}
+    scrapeTimeout: ${config.monitoring.serviceMonitor.scrapeTimeout}
+    prometheusRelease: ${config.monitoring.serviceMonitor.prometheusRelease}` : ''}
+${config.monitoring.alerts?.enabled ? `  alerts:
+    enabled: true
+${config.monitoring.alerts.slackWebhookUrl ? `    slackWebhookUrl: ${config.monitoring.alerts.slackWebhookUrl}` : ''}
+    rules:
+      diskSpaceCritical:
+        enabled: ${config.monitoring.alerts.rules?.diskSpaceCritical?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.diskSpaceCritical?.threshold || 10}
+        forDuration: ${config.monitoring.alerts.rules?.diskSpaceCritical?.forDuration || '5m'}
+      diskSpaceWarning:
+        enabled: ${config.monitoring.alerts.rules?.diskSpaceWarning?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.diskSpaceWarning?.threshold || 20}
+        forDuration: ${config.monitoring.alerts.rules?.diskSpaceWarning?.forDuration || '10m'}
+      highMemoryUsage:
+        enabled: ${config.monitoring.alerts.rules?.highMemoryUsage?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.highMemoryUsage?.threshold || 80}
+        forDuration: ${config.monitoring.alerts.rules?.highMemoryUsage?.forDuration || '10m'}
+      txPoolOverload:
+        enabled: ${config.monitoring.alerts.rules?.txPoolOverload?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.txPoolOverload?.threshold || 5000}
+        forDuration: ${config.monitoring.alerts.rules?.txPoolOverload?.forDuration || '5m'}
+      txPoolNearCapacity:
+        enabled: ${config.monitoring.alerts.rules?.txPoolNearCapacity?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.txPoolNearCapacity?.threshold || 8000}
+        forDuration: ${config.monitoring.alerts.rules?.txPoolNearCapacity?.forDuration || '2m'}
+      highCPUUsage:
+        enabled: ${config.monitoring.alerts.rules?.highCPUUsage?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.highCPUUsage?.threshold || 80}
+        forDuration: ${config.monitoring.alerts.rules?.highCPUUsage?.forDuration || '10m'}
+      highIOWait:
+        enabled: ${config.monitoring.alerts.rules?.highIOWait?.enabled || true}
+        threshold: ${config.monitoring.alerts.rules?.highIOWait?.threshold || 20}
+        forDuration: ${config.monitoring.alerts.rules?.highIOWait?.forDuration || '10m'}
+      predictDiskFull:
+        enabled: ${config.monitoring.alerts.rules?.predictDiskFull?.enabled || true}
+        predictHours: ${config.monitoring.alerts.rules?.predictDiskFull?.predictHours || 4}
+        forDuration: ${config.monitoring.alerts.rules?.predictDiskFull?.forDuration || '5m'}` : ''}` : ''}
 
 ${config.livenessProbe ? `livenessProbe:
   enabled: ${config.livenessProbe.enabled}

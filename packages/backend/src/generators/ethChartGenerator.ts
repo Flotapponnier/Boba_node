@@ -46,7 +46,23 @@ export function generateEthValuesYaml(config: EthConfig, deploymentName: string)
 
   // Add monitoring if enabled
   if (config.monitoring?.enabled) {
-    values.monitoring = config.monitoring;
+    values.monitoring = {
+      ...config.monitoring,
+      // Ensure alerts.rules exists with default values if alerts are enabled
+      alerts: config.monitoring.alerts?.enabled ? {
+        ...config.monitoring.alerts,
+        rules: config.monitoring.alerts.rules || {
+          diskSpaceCritical: { enabled: true, threshold: 10, forDuration: '5m' },
+          diskSpaceWarning: { enabled: true, threshold: 20, forDuration: '10m' },
+          highMemoryUsage: { enabled: true, threshold: 80, forDuration: '10m' },
+          txPoolOverload: { enabled: true, threshold: 5000, forDuration: '5m' },
+          txPoolNearCapacity: { enabled: true, threshold: 8000, forDuration: '2m' },
+          highCPUUsage: { enabled: true, threshold: 80, forDuration: '10m' },
+          highIOWait: { enabled: true, threshold: 20, forDuration: '10m' },
+          predictDiskFull: { enabled: true, predictHours: 4, forDuration: '5m' },
+        }
+      } : config.monitoring.alerts,
+    };
   }
 
   // Add validator if enabled

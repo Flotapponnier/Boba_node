@@ -22,6 +22,17 @@ interface MonitoringSectionProps {
     };
     alerts?: {
       enabled: boolean;
+      slackWebhookUrl?: string;
+      rules?: {
+        diskSpaceCritical?: { enabled: boolean; threshold: number; forDuration: string };
+        diskSpaceWarning?: { enabled: boolean; threshold: number; forDuration: string };
+        highMemoryUsage?: { enabled: boolean; threshold: number; forDuration: string };
+        txPoolOverload?: { enabled: boolean; threshold: number; forDuration: string };
+        txPoolNearCapacity?: { enabled: boolean; threshold: number; forDuration: string };
+        highCPUUsage?: { enabled: boolean; threshold: number; forDuration: string };
+        highIOWait?: { enabled: boolean; threshold: number; forDuration: string };
+        predictDiskFull?: { enabled: boolean; predictHours: number; forDuration: string };
+      };
     };
     prometheusOperator: boolean;
     grafanaDashboard: boolean;
@@ -217,15 +228,412 @@ export default function MonitoringSection({ monitoring, onChange }: MonitoringSe
                 type="checkbox"
                 checked={monitoring.alerts?.enabled || false}
                 onChange={(e) => {
-                  onChange('monitoring.alerts', { enabled: e.target.checked });
+                  if (e.target.checked) {
+                    onChange('monitoring.alerts', {
+                      enabled: true,
+                      slackWebhookUrl: '',
+                      rules: {
+                        diskSpaceCritical: { enabled: true, threshold: 10, forDuration: '5m' },
+                        diskSpaceWarning: { enabled: true, threshold: 20, forDuration: '10m' },
+                        highMemoryUsage: { enabled: true, threshold: 80, forDuration: '10m' },
+                        txPoolOverload: { enabled: true, threshold: 5000, forDuration: '5m' },
+                        txPoolNearCapacity: { enabled: true, threshold: 8000, forDuration: '2m' },
+                        highCPUUsage: { enabled: true, threshold: 80, forDuration: '10m' },
+                        highIOWait: { enabled: true, threshold: 20, forDuration: '10m' },
+                        predictDiskFull: { enabled: true, predictHours: 4, forDuration: '5m' },
+                      }
+                    });
+                  } else {
+                    onChange('monitoring.alerts', { enabled: false });
+                  }
                 }}
               />
               <span>
                 Enable PrometheusRule Alerts
-                <HelpTooltip content="Deploys 15+ production-ready alerts: CRITICAL (NodeDown, NoPeers, SyncStalled, DiskSpaceCritical), WARNING (LowPeerCount, SyncLag, HighMemoryUsage, TxPoolOverload), PERFORMANCE (HighCPUUsage, HighIOWait, PredictDiskFull). Alerts integrate with Alertmanager for notifications." />
+                <HelpTooltip content="Deploys production-ready alerts with Slack notifications: CRITICAL (NodeDown, NotSyncing, DiskSpaceCritical), WARNING (DiskSpaceWarning, HighMemoryUsage, TxPoolOverload), PERFORMANCE (HighCPUUsage, HighIOWait, PredictDiskFull). Configure individual alerts and thresholds below." />
               </span>
             </label>
           </div>
+
+          {monitoring.alerts?.enabled && (
+            <>
+              {/* Slack Webhook Configuration */}
+              <div className="form-group" style={{ marginTop: '20px' }}>
+                <label>
+                  Slack Webhook URL (Optional)
+                  <HelpTooltip content="Slack incoming webhook URL for alert notifications. Get yours from Slack App Settings > Incoming Webhooks. Format: https://hooks.slack.com/services/T.../B.../... Leave empty to skip Slack notifications." />
+                </label>
+                <input
+                  type="text"
+                  value={monitoring.alerts.slackWebhookUrl || ''}
+                  onChange={(e) => onChange('monitoring.alerts.slackWebhookUrl', e.target.value)}
+                  placeholder="https://hooks.slack.com/services/..."
+                />
+              </div>
+
+              {/* Alert Rules Configuration */}
+              <h4 style={{ marginTop: '25px', marginBottom: '15px', fontSize: '1.1rem', color: '#fff' }}>Individual Alert Rules</h4>
+
+              {/* Critical Alerts */}
+              <div style={{ marginBottom: '20px' }}>
+                <h5 style={{ color: '#ef4444', marginBottom: '10px', fontSize: '0.95rem' }}>🔴 Critical Alerts</h5>
+
+                {/* Disk Space Critical */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #ef4444' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.diskSpaceCritical?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceCritical', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.diskSpaceCritical?.threshold || 10,
+                        forDuration: monitoring.alerts.rules?.diskSpaceCritical?.forDuration || '5m'
+                      })}
+                    />
+                    <span>Disk Space Critical - Very low disk space remaining
+                      <HelpTooltip content="Critical alert when available disk space falls below threshold (default 10%). Requires immediate action - expand storage or prune data. Blockchain nodes can fill disks quickly during sync." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.diskSpaceCritical?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (%):
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={monitoring.alerts.rules.diskSpaceCritical.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceCritical.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.diskSpaceCritical.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceCritical.forDuration', e.target.value)}
+                          placeholder="5m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Warning Alerts */}
+              <div style={{ marginBottom: '20px' }}>
+                <h5 style={{ color: '#f59e0b', marginBottom: '10px', fontSize: '0.95rem' }}>🟡 Warning Alerts</h5>
+
+                {/* Disk Space Warning */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #f59e0b' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.diskSpaceWarning?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceWarning', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.diskSpaceWarning?.threshold || 20,
+                        forDuration: monitoring.alerts.rules?.diskSpaceWarning?.forDuration || '10m'
+                      })}
+                    />
+                    <span>Disk Space Warning - Low disk space remaining
+                      <HelpTooltip content="Warning alert when available disk space falls below threshold (default 20%). Time to plan storage expansion or data pruning. Gives advance notice before reaching critical levels." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.diskSpaceWarning?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (%):
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={monitoring.alerts.rules.diskSpaceWarning.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceWarning.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.diskSpaceWarning.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.diskSpaceWarning.forDuration', e.target.value)}
+                          placeholder="10m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* High Memory Usage */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #f59e0b' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.highMemoryUsage?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.highMemoryUsage', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.highMemoryUsage?.threshold || 80,
+                        forDuration: monitoring.alerts.rules?.highMemoryUsage?.forDuration || '10m'
+                      })}
+                    />
+                    <span>High Memory Usage - Memory usage above threshold
+                      <HelpTooltip content="Warning alert when system memory usage exceeds threshold (default 80%). Helps prevent OOM (Out Of Memory) kills. Monitor for sustained high usage - if persistent, consider increasing memory limits. Temporary spikes during sync are normal." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.highMemoryUsage?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (%):
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={monitoring.alerts.rules.highMemoryUsage.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highMemoryUsage.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.highMemoryUsage.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highMemoryUsage.forDuration', e.target.value)}
+                          placeholder="10m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* TX Pool Overload */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #f59e0b' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.txPoolOverload?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.txPoolOverload', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.txPoolOverload?.threshold || 5000,
+                        forDuration: monitoring.alerts.rules?.txPoolOverload?.forDuration || '5m'
+                      })}
+                    />
+                    <span>TX Pool Overload - Too many pending transactions
+                      <HelpTooltip content="Warning alert when pending transaction count exceeds threshold (default 5000). Normal during high network activity (NFT mints, airdrops, DeFi spikes). Monitor for degraded RPC performance. Consider increasing if persistent." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.txPoolOverload?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (count):
+                        <input
+                          type="number"
+                          min="100"
+                          max="50000"
+                          value={monitoring.alerts.rules.txPoolOverload.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.txPoolOverload.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '90px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.txPoolOverload.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.txPoolOverload.forDuration', e.target.value)}
+                          placeholder="5m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* TX Pool Near Capacity */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #f59e0b' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.txPoolNearCapacity?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.txPoolNearCapacity', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.txPoolNearCapacity?.threshold || 8000,
+                        forDuration: monitoring.alerts.rules?.txPoolNearCapacity?.forDuration || '2m'
+                      })}
+                    />
+                    <span>TX Pool Near Capacity - Critical tx pool threshold
+                      <HelpTooltip content="Critical alert when pending transactions approach maximum capacity (default 8000, capacity is 10000). Warns before node starts dropping transactions. Consider increasing txpool.globalslots if this persists. Indicates extremely high network load." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.txPoolNearCapacity?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (count):
+                        <input
+                          type="number"
+                          min="100"
+                          max="50000"
+                          value={monitoring.alerts.rules.txPoolNearCapacity.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.txPoolNearCapacity.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '90px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.txPoolNearCapacity.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.txPoolNearCapacity.forDuration', e.target.value)}
+                          placeholder="2m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Performance Alerts */}
+              <div style={{ marginBottom: '20px' }}>
+                <h5 style={{ color: '#3b82f6', marginBottom: '10px', fontSize: '0.95rem' }}>🔵 Performance Alerts</h5>
+
+                {/* High CPU Usage */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #3b82f6' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.highCPUUsage?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.highCPUUsage', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.highCPUUsage?.threshold || 80,
+                        forDuration: monitoring.alerts.rules?.highCPUUsage?.forDuration || '10m'
+                      })}
+                    />
+                    <span>High CPU Usage - CPU usage above threshold
+                      <HelpTooltip content="Performance alert when CPU usage exceeds threshold (default 80%). Normal during initial sync or when processing many blocks. If persistent when synced, investigate RPC load or stuck processes. May indicate need for more CPU cores." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.highCPUUsage?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (%):
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={monitoring.alerts.rules.highCPUUsage.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highCPUUsage.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.highCPUUsage.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highCPUUsage.forDuration', e.target.value)}
+                          placeholder="10m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* High IO Wait */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #3b82f6' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.highIOWait?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.highIOWait', {
+                        enabled: e.target.checked,
+                        threshold: monitoring.alerts.rules?.highIOWait?.threshold || 20,
+                        forDuration: monitoring.alerts.rules?.highIOWait?.forDuration || '10m'
+                      })}
+                    />
+                    <span>High IO Wait - System I/O constrained
+                      <HelpTooltip content="Performance alert when I/O wait time exceeds threshold (default 20%). Indicates disk performance bottleneck. Check disk IOPS and throughput. Blockchain nodes require minimum 3000 IOPS, optimal 8000+ IOPS. Consider upgrading to faster NVMe SSD." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.highIOWait?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Threshold (%):
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={monitoring.alerts.rules.highIOWait.threshold}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highIOWait.threshold', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.highIOWait.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.highIOWait.forDuration', e.target.value)}
+                          placeholder="10m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* Predict Disk Full */}
+                <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #3b82f6' }}>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={monitoring.alerts.rules?.predictDiskFull?.enabled || false}
+                      onChange={(e) => onChange('monitoring.alerts.rules.predictDiskFull', {
+                        enabled: e.target.checked,
+                        predictHours: monitoring.alerts.rules?.predictDiskFull?.predictHours || 4,
+                        forDuration: monitoring.alerts.rules?.predictDiskFull?.forDuration || '5m'
+                      })}
+                    />
+                    <span>Predict Disk Full - Disk predicted to fill soon
+                      <HelpTooltip content="Predictive alert using linear regression to forecast disk exhaustion (default predicts 4 hours ahead). Based on current fill rate over past hour. Requires immediate action - expand storage or prune data. More accurate during steady growth patterns." />
+                    </span>
+                  </label>
+                  {monitoring.alerts.rules?.predictDiskFull?.enabled && (
+                    <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Predict hours:
+                        <input
+                          type="number"
+                          min="1"
+                          max="48"
+                          value={monitoring.alerts.rules.predictDiskFull.predictHours}
+                          onChange={(e) => onChange('monitoring.alerts.rules.predictDiskFull.predictHours', Number(e.target.value))}
+                          style={{ marginLeft: '10px', width: '70px' }}
+                        />
+                      </label>
+                      <label style={{ fontSize: '0.9rem' }}>
+                        Duration:
+                        <input
+                          type="text"
+                          value={monitoring.alerts.rules.predictDiskFull.forDuration}
+                          onChange={(e) => onChange('monitoring.alerts.rules.predictDiskFull.forDuration', e.target.value)}
+                          placeholder="5m"
+                          style={{ marginLeft: '10px', width: '80px' }}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Dashboard Configuration */}
           <h3>Grafana Dashboard</h3>

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: bsc-node
+description: 'Binance Smart Chain Node '
+type: application
+version: 1.0.0
+appVersion: latest
+keywords:
+  - blockchain
+  - bsc
+  - binance
+  - fast-node
+maintainers:
+  - name: Boba Node Team
