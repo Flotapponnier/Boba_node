@@ -897,7 +897,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.diskSpaceCritical?.forDuration || '5m'
                           })}
                         />
-                        <span>Disk Space Critical - Very low disk space remaining</span>
+                        <span>Disk Space Critical - Very low disk space remaining
+                          <HelpTooltip content="Critical alert when available disk space falls below threshold (default 10%). Requires immediate action - expand storage or prune data. Blockchain nodes can fill disks quickly during sync." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.diskSpaceCritical?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -943,7 +945,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.diskSpaceWarning?.forDuration || '10m'
                           })}
                         />
-                        <span>Disk Space Warning - Low disk space remaining</span>
+                        <span>Disk Space Warning - Low disk space remaining
+                          <HelpTooltip content="Warning alert when available disk space falls below threshold (default 20%). Time to plan storage expansion or data pruning. Gives advance notice before reaching critical levels." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.diskSpaceWarning?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -984,7 +988,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.highMemoryUsage?.forDuration || '10m'
                           })}
                         />
-                        <span>High Memory Usage - Memory usage above threshold</span>
+                        <span>High Memory Usage - Memory usage above threshold
+                          <HelpTooltip content="Warning alert when system memory usage exceeds threshold (default 80%). Helps prevent OOM (Out Of Memory) kills. Monitor for sustained high usage - if persistent, consider increasing memory limits. Temporary spikes during sync are normal." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.highMemoryUsage?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -1025,7 +1031,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.txPoolOverload?.forDuration || '5m'
                           })}
                         />
-                        <span>TX Pool Overload - Too many pending transactions</span>
+                        <span>TX Pool Overload - Too many pending transactions
+                          <HelpTooltip content="Warning alert when pending transaction count exceeds threshold (default 5000). Normal during high network activity (NFT mints, airdrops, DeFi spikes). Monitor for degraded RPC performance. Consider increasing if persistent." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.txPoolOverload?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -1066,7 +1074,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.txPoolNearCapacity?.forDuration || '2m'
                           })}
                         />
-                        <span>TX Pool Near Capacity - Critical tx pool threshold</span>
+                        <span>TX Pool Near Capacity - Critical tx pool threshold
+                          <HelpTooltip content="Critical alert when pending transactions approach maximum capacity (default 8000, capacity is 10000). Warns before node starts dropping transactions. Consider increasing txpool.globalslots if this persists. Indicates extremely high network load." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.txPoolNearCapacity?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -1112,7 +1122,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.highCPUUsage?.forDuration || '10m'
                           })}
                         />
-                        <span>High CPU Usage - CPU usage above threshold</span>
+                        <span>High CPU Usage - CPU usage above threshold
+                          <HelpTooltip content="Performance alert when CPU usage exceeds threshold (default 80%). Normal during initial sync or when processing many blocks. If persistent when synced, investigate RPC load or stuck processes. May indicate need for more CPU cores." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.highCPUUsage?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -1153,7 +1165,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.highIOWait?.forDuration || '10m'
                           })}
                         />
-                        <span>High IO Wait - System I/O constrained</span>
+                        <span>High IO Wait - System I/O constrained
+                          <HelpTooltip content="Performance alert when I/O wait time exceeds threshold (default 20%). Indicates disk performance bottleneck. Check disk IOPS and throughput. Blockchain nodes require minimum 3000 IOPS, optimal 8000+ IOPS. Consider upgrading to faster NVMe SSD." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.highIOWait?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
@@ -1194,7 +1208,9 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                             forDuration: config.monitoring.alerts.rules?.predictDiskFull?.forDuration || '5m'
                           })}
                         />
-                        <span>Predict Disk Full - Disk predicted to fill soon</span>
+                        <span>Predict Disk Full - Disk predicted to fill soon
+                          <HelpTooltip content="Predictive alert using linear regression to forecast disk exhaustion (default predicts 4 hours ahead). Based on current fill rate over past hour. Requires immediate action - expand storage or prune data. More accurate during steady growth patterns." />
+                        </span>
                       </label>
                       {config.monitoring.alerts.rules?.predictDiskFull?.enabled && (
                         <div style={{ marginLeft: '30px', marginTop: '8px', display: 'flex', gap: '15px' }}>
