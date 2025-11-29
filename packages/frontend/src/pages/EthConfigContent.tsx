@@ -321,7 +321,7 @@ export default function EthConfigContent({ nodeType }: EthConfigContentProps) {
             <div className="form-group">
               <label>
                 Metrics Port
-                <HelpTooltip content="Prometheus metrics endpoint. Default: 6060. Exposes node performance and health metrics for monitoring." />
+                <HelpTooltip content="pprof debugging endpoint. Default: 6060. Exposes Go profiling data (CPU, memory, goroutines) at /debug/pprof/ for performance analysis and troubleshooting." />
               </label>
               <input
                 type="number"
