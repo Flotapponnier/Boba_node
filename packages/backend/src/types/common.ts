@@ -69,6 +69,14 @@ export const SnapshotSchema = z.object({
   checksum: z.string().optional(),
 });
 
+// Alert rule schema
+export const AlertRuleSchema = z.object({
+  enabled: z.boolean(),
+  threshold: z.number().optional(),
+  predictHours: z.number().optional(),
+  forDuration: z.string(),
+});
+
 // Common monitoring configuration
 export const MonitoringSchema = z.object({
   enabled: z.boolean().default(false),
@@ -90,6 +98,18 @@ export const MonitoringSchema = z.object({
   }).optional(),
   alerts: z.object({
     enabled: z.boolean().default(true),
+    slackWebhookUrl: z.string().optional(),
+    rules: z.object({
+      nodeDown: AlertRuleSchema.optional(),
+      diskSpaceCritical: AlertRuleSchema.optional(),
+      diskSpaceWarning: AlertRuleSchema.optional(),
+      highMemoryUsage: AlertRuleSchema.optional(),
+      txPoolOverload: AlertRuleSchema.optional(),
+      txPoolNearCapacity: AlertRuleSchema.optional(),
+      highCPUUsage: AlertRuleSchema.optional(),
+      highIOWait: AlertRuleSchema.optional(),
+      predictDiskFull: AlertRuleSchema.optional(),
+    }).optional(),
   }).optional(),
   prometheusOperator: z.boolean().default(true),
   grafanaDashboard: z.boolean().default(true),
@@ -125,6 +145,7 @@ export type Resources = z.infer<typeof ResourcesSchema>;
 export type Persistence = z.infer<typeof PersistenceSchema>;
 export type Probe = z.infer<typeof ProbeSchema>;
 export type Snapshot = z.infer<typeof SnapshotSchema>;
+export type AlertRule = z.infer<typeof AlertRuleSchema>;
 export type Monitoring = z.infer<typeof MonitoringSchema>;
 export type Networking = z.infer<typeof NetworkingSchema>;
 export type BaseChainConfig = z.infer<typeof BaseChainConfigSchema>;
