@@ -1326,7 +1326,7 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
             },
             expr: "rate(node_network_receive_bytes_total{device!~\"lo|veth.*\"}[5m])",
             refId: "A",
-            legendFormat: "RX {{device}}"
+            legendFormat: `RX ${"{{"}device${"}}"}`
           },
           {
             datasource: {
@@ -1335,7 +1335,7 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
             },
             expr: "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*\"}[5m])",
             refId: "B",
-            legendFormat: "TX {{device}}"
+            legendFormat: `TX ${"{{"}device${"}}"}`
           }
         ],
         title: "Network Traffic",
