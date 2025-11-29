@@ -84,7 +84,6 @@ interface BscConfig {
       enabled: boolean;
       slackWebhookUrl?: string;
       rules?: {
-        nodeDown?: { enabled: boolean; forDuration: string };
         diskSpaceCritical?: { enabled: boolean; threshold: number; forDuration: string };
         diskSpaceWarning?: { enabled: boolean; threshold: number; forDuration: string };
         highMemoryUsage?: { enabled: boolean; threshold: number; forDuration: string };
@@ -841,7 +840,6 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                           enabled: true,
                           slackWebhookUrl: '',
                           rules: {
-                            nodeDown: { enabled: true, forDuration: '1m' },
                             diskSpaceCritical: { enabled: true, threshold: 10, forDuration: '5m' },
                             diskSpaceWarning: { enabled: true, threshold: 20, forDuration: '10m' },
                             highMemoryUsage: { enabled: true, threshold: 80, forDuration: '10m' },
@@ -886,35 +884,6 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                   {/* Critical Alerts */}
                   <div style={{ marginBottom: '20px' }}>
                     <h5 style={{ color: '#ef4444', marginBottom: '10px', fontSize: '0.95rem' }}>🔴 Critical Alerts</h5>
-
-                    {/* Node Down */}
-                    <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #ef4444' }}>
-                      <label className="checkbox-label">
-                        <input
-                          type="checkbox"
-                          checked={config.monitoring.alerts.rules?.nodeDown?.enabled || false}
-                          onChange={(e) => handleChange('monitoring.alerts.rules.nodeDown', {
-                            enabled: e.target.checked,
-                            forDuration: config.monitoring.alerts.rules?.nodeDown?.forDuration || '1m'
-                          })}
-                        />
-                        <span>Node Down - Node not responding to Prometheus scrapes</span>
-                      </label>
-                      {config.monitoring.alerts.rules?.nodeDown?.enabled && (
-                        <div style={{ marginLeft: '30px', marginTop: '8px' }}>
-                          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '5px' }}>
-                            Alert after down for:
-                            <input
-                              type="text"
-                              value={config.monitoring.alerts.rules.nodeDown.forDuration}
-                              onChange={(e) => handleChange('monitoring.alerts.rules.nodeDown.forDuration', e.target.value)}
-                              placeholder="1m"
-                              style={{ marginLeft: '10px', width: '80px' }}
-                            />
-                          </label>
-                        </div>
-                      )}
-                    </div>
 
                     {/* Disk Space Critical */}
                     <div className="form-group" style={{ paddingLeft: '15px', borderLeft: '3px solid #ef4444' }}>

@@ -22,19 +22,6 @@ spec:
   - name: ${chain}-node-critical
     interval: 30s
     rules:
-    {{- if .Values.monitoring.alerts.rules.nodeDown.enabled }}
-    - alert: ${chainUpper}NodeDown
-      expr: up{job="{{ .Values.nodeName }}", chain="${chain}"} == 0
-      for: {{ .Values.monitoring.alerts.rules.nodeDown.forDuration }}
-      labels:
-        severity: critical
-        chain: ${chain}
-      annotations:
-        summary: "${chainName} node is down"
-        description: "${chainName} node {{ printf "{{" }} $labels.pod {{ "}}" }} is not responding to Prometheus scrapes"
-        runbook: "Check pod status: kubectl get pod {{ printf "{{" }} $labels.pod {{ "}}" }} -n {{ printf "{{" }} $labels.namespace {{ "}}" }}"
-    {{- end }}
-
     {{- if .Values.monitoring.alerts.rules.diskSpaceCritical.enabled }}
     - alert: ${chainUpper}NodeDiskSpaceCritical
       expr: |

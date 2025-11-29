@@ -100,7 +100,6 @@ export const MonitoringSchema = z.object({
     enabled: z.boolean().default(true),
     slackWebhookUrl: z.string().optional(),
     rules: z.object({
-      nodeDown: AlertRuleSchema.optional(),
       diskSpaceCritical: AlertRuleSchema.optional(),
       diskSpaceWarning: AlertRuleSchema.optional(),
       highMemoryUsage: AlertRuleSchema.optional(),
