@@ -1326,7 +1326,7 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
             },
             expr: "rate(node_network_receive_bytes_total{device!~\"lo|veth.*\"}[5m])",
             refId: "A",
-            legendFormat: `RX ${"{{"}device${"}}"}`
+            legendFormat: "RX {{device}}"
           },
           {
             datasource: {
@@ -1335,7 +1335,7 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
             },
             expr: "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*\"}[5m])",
             refId: "B",
-            legendFormat: `TX ${"{{"}device${"}}"}`
+            legendFormat: "TX {{device}}"
           }
         ],
         title: "Network Traffic",
@@ -1361,7 +1361,10 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
     weekStart: ""
   };
 
-  const dashboardJson = JSON.stringify(dashboard, null, 2);
+  const dashboardJson = JSON.stringify(dashboard, null, 2)
+    // Escape {{ and }} for Helm templating - replace with Helm printf syntax
+    .replace(/\{\{/g, '{{ "{{" }}')
+    .replace(/\}\}/g, '{{ "}}" }}');
 
   return `{{- if and .Values.monitoring.enabled .Values.monitoring.grafana.dashboards.enabled }}
 apiVersion: v1
