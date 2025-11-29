@@ -5,9 +5,7 @@ import bscImage from '../assets/boba_node_bsc.png';
 import ethereumImage from '../assets/boba_node_ethereum.png';
 import arbitrumImage from '../assets/boba_node_arbitrum.png';
 import NodeTypeModal from '../components/NodeTypeModal';
-import BscConfigContent from './BscConfigContent';
-import EthConfigContent from './EthConfigContent';
-import ArbConfigContent from './ArbConfigContent';
+import UnifiedConfigContent from './UnifiedConfigContent';
 import './HomePage.css';
 
 interface NodeCard {
@@ -86,9 +84,9 @@ export default function NewHomePage() {
         </header>
 
         <main className="main-content">
-          {chain === 'bsc' && <BscConfigContent nodeType={nodeType} />}
-          {chain === 'ethereum' && <EthConfigContent nodeType={nodeType} />}
-          {chain === 'arbitrum' && <ArbConfigContent nodeType={nodeType} />}
+          {chain === 'bsc' && <UnifiedConfigContent chain="bsc" nodeType={nodeType} />}
+          {chain === 'ethereum' && <UnifiedConfigContent chain="eth" nodeType={nodeType} />}
+          {chain === 'arbitrum' && <UnifiedConfigContent chain="arb" nodeType={nodeType} />}
         </main>
 
         <footer className="footer">
