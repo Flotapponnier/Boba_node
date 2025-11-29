@@ -1361,12 +1361,14 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
     weekStart: ""
   };
 
-  // Convert dashboard to JSON and escape {{ }} for Helm
+  // Convert dashboard to JSON and escape {{ }} for Helm using placeholders
   const dashboardJson = JSON.stringify(dashboard, null, 2)
-    .split('{{').join('{{ "{{" }}')
-    .split('}}').join('{{ "}}" }}');
+    .split('{{').join('__HELM_OPEN__')
+    .split('}}').join('__HELM_CLOSE__')
+    .split('__HELM_OPEN__').join('{{ "{{" }}')
+    .split('__HELM_CLOSE__').join('{{ "}}" }}');
 
-  return `{{- if and .Values.monitoring.enabled .Values.monitoring.grafana.dashboards.enabled }}
+  return `{{- if and .Values.monitoring.enabled .Values.monitoring.grafanaDashboard }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
