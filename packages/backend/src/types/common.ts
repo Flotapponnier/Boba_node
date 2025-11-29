@@ -72,12 +72,27 @@ export const SnapshotSchema = z.object({
 // Common monitoring configuration
 export const MonitoringSchema = z.object({
   enabled: z.boolean().default(false),
+  gethExporter: z.object({
+    enabled: z.boolean().default(true),
+    image: z.object({
+      repository: z.string().default('etclabscore/gethexporter'),
+      tag: z.string().default('latest'),
+      pullPolicy: z.enum(['Always', 'IfNotPresent', 'Never']).default('IfNotPresent'),
+    }),
+    rpcUrl: z.string().default('http://localhost:8545'),
+    port: z.number().int().min(1).max(65535).default(6061),
+  }).optional(),
+  serviceMonitor: z.object({
+    enabled: z.boolean().default(true),
+    interval: z.string().default('10s'),
+    scrapeTimeout: z.string().default('10s'),
+    prometheusRelease: z.string().default('kube-prometheus-stack'),
+  }).optional(),
+  alerts: z.object({
+    enabled: z.boolean().default(true),
+  }).optional(),
   prometheusOperator: z.boolean().default(true),
   grafanaDashboard: z.boolean().default(true),
-  serviceMonitor: z.object({
-    interval: z.string().default('30s'),
-    scrapeTimeout: z.string().default('10s'),
-  }).optional(),
 });
 
 // Common networking configuration

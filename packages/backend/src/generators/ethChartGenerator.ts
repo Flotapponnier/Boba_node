@@ -153,6 +153,34 @@ ${generateVolumeMounts('/data', '/config')}
         env:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+      {{- if and .Values.monitoring .Values.monitoring.enabled .Values.monitoring.gethExporter.enabled }}
+      # Geth Exporter Sidecar - Exposes Prometheus metrics from RPC
+      - name: geth-exporter
+        image: "{{ .Values.monitoring.gethExporter.image.repository }}:{{ .Values.monitoring.gethExporter.image.tag }}"
+        imagePullPolicy: {{ .Values.monitoring.gethExporter.image.pullPolicy }}
+        env:
+        - name: GETH
+          value: "{{ .Values.monitoring.gethExporter.rpcUrl }}"
+        - name: DELAY
+          value: "1000"
+        ports:
+        - name: exporter
+          containerPort: {{ .Values.monitoring.gethExporter.port }}
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: exporter
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      {{- end }}
 ${generateVolumes('{{ .Values.nodeName }}-config')}
 ${generateVolumeClaimTemplates()}
 `;

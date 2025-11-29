@@ -73,6 +73,12 @@ spec:
     {{- if .Values.service.ports.p2p.hostPort }}
     hostPort: {{ .Values.service.ports.p2p.hostPort }}
     {{- end }}
+  {{- if and .Values.monitoring .Values.monitoring.enabled .Values.monitoring.gethExporter.enabled }}
+  - name: geth-exporter
+    port: {{ .Values.monitoring.gethExporter.port }}
+    targetPort: exporter
+    protocol: TCP
+  {{- end }}
 `;
 }
 

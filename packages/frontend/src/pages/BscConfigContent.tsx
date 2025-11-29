@@ -64,6 +64,25 @@ interface BscConfig {
   };
   monitoring?: {
     enabled: boolean;
+    gethExporter?: {
+      enabled: boolean;
+      image: {
+        repository: string;
+        tag: string;
+        pullPolicy: 'Always' | 'IfNotPresent' | 'Never';
+      };
+      rpcUrl: string;
+      port: number;
+    };
+    serviceMonitor?: {
+      enabled: boolean;
+      interval: string;
+      scrapeTimeout: string;
+      prometheusRelease: string;
+    };
+    alerts?: {
+      enabled: boolean;
+    };
     prometheusOperator: boolean;
     grafanaDashboard: boolean;
   };
@@ -621,7 +640,7 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
         <div className="config-section">
           <SectionHeader
             title="Monitoring Stack"
-            tooltip="Integrates Prometheus metrics and Grafana dashboards for comprehensive node monitoring. Tracks sync progress, peer connections, block processing, resource usage, and chain health. Essential for production operations to detect issues proactively."
+            tooltip="Production-grade monitoring with Geth Exporter sidecar, Prometheus ServiceMonitor, and Grafana dashboards. Includes 15+ alerts for critical issues (node down, sync stalled), warnings (low peers, disk space), and performance metrics. Essential for production operations."
           />
           <div className="form-group">
             <label className="checkbox-label">
@@ -632,6 +651,25 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                   if (e.target.checked) {
                     handleChange('monitoring', {
                       enabled: true,
+                      gethExporter: {
+                        enabled: true,
+                        image: {
+                          repository: 'etclabscore/gethexporter',
+                          tag: 'latest',
+                          pullPolicy: 'IfNotPresent',
+                        },
+                        rpcUrl: 'http://localhost:8545',
+                        port: 6061,
+                      },
+                      serviceMonitor: {
+                        enabled: true,
+                        interval: '10s',
+                        scrapeTimeout: '10s',
+                        prometheusRelease: 'kube-prometheus-stack',
+                      },
+                      alerts: {
+                        enabled: true,
+                      },
                       prometheusOperator: true,
                       grafanaDashboard: true,
                     });
@@ -640,21 +678,164 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                   }
                 }}
               />
-              Enable Prometheus metrics and Grafana dashboard
+              <span>
+                Enable Production Monitoring Stack
+                <HelpTooltip content="Deploys complete monitoring solution: Geth Exporter sidecar (exposes blockchain metrics), Prometheus ServiceMonitor (scrapes metrics every 10s), PrometheusRule (15+ production alerts), and Grafana dashboard (14 panels). Monitors sync status, peer count, block processing, tx pool, CPU, memory, disk, and network." />
+              </span>
             </label>
           </div>
           {config.monitoring?.enabled && (
-            <div className="form-grid two-columns">
+            <>
+              {/* Geth Exporter Configuration */}
+              <h3>Geth Exporter Sidecar</h3>
               <div className="form-group">
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
-                    checked={config.monitoring.prometheusOperator}
-                    onChange={(e) => handleChange('monitoring.prometheusOperator', e.target.checked)}
+                    checked={config.monitoring.gethExporter?.enabled || false}
+                    onChange={(e) => {
+                      const currentMonitoring = config.monitoring || { enabled: true, prometheusOperator: true, grafanaDashboard: true };
+                      handleChange('monitoring.gethExporter', e.target.checked ? {
+                        enabled: true,
+                        image: {
+                          repository: 'etclabscore/gethexporter',
+                          tag: 'latest',
+                          pullPolicy: 'IfNotPresent',
+                        },
+                        rpcUrl: 'http://localhost:8545',
+                        port: 6061,
+                      } : { enabled: false });
+                    }}
                   />
-                  Include Prometheus ServiceMonitor
+                  <span>
+                    Enable Geth Exporter
+                    <HelpTooltip content="Deploys etclabscore/gethexporter sidecar container that queries the node's RPC endpoint and exposes blockchain-specific metrics (block number, peer count, tx pool size, gas usage) in Prometheus format on port 6061." />
+                  </span>
                 </label>
               </div>
+
+              {config.monitoring.gethExporter?.enabled && (
+                <div className="form-grid three-columns">
+                  <div className="form-group">
+                    <label>
+                      Exporter Image Repository
+                      <HelpTooltip content="Docker image for the Geth Exporter. Default: etclabscore/gethexporter (official community image)." />
+                    </label>
+                    <input
+                      type="text"
+                      value={config.monitoring.gethExporter.image.repository}
+                      onChange={(e) => handleChange('monitoring.gethExporter.image.repository', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Exporter Image Tag
+                      <HelpTooltip content="Image version. 'latest' is recommended for stable releases." />
+                    </label>
+                    <input
+                      type="text"
+                      value={config.monitoring.gethExporter.image.tag}
+                      onChange={(e) => handleChange('monitoring.gethExporter.image.tag', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Exporter Port
+                      <HelpTooltip content="Port where Geth Exporter exposes Prometheus metrics. Default: 6061. Prometheus will scrape this endpoint." />
+                    </label>
+                    <input
+                      type="number"
+                      value={config.monitoring.gethExporter.port}
+                      onChange={(e) => handleChange('monitoring.gethExporter.port', Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ServiceMonitor Configuration */}
+              <h3>Prometheus ServiceMonitor</h3>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={config.monitoring.serviceMonitor?.enabled || false}
+                    onChange={(e) => {
+                      handleChange('monitoring.serviceMonitor', e.target.checked ? {
+                        enabled: true,
+                        interval: '10s',
+                        scrapeTimeout: '10s',
+                        prometheusRelease: 'kube-prometheus-stack',
+                      } : { enabled: false });
+                    }}
+                  />
+                  <span>
+                    Enable ServiceMonitor
+                    <HelpTooltip content="Creates a Prometheus Operator ServiceMonitor resource that automatically configures Prometheus to scrape metrics from the Geth Exporter. Requires Prometheus Operator to be installed in the cluster." />
+                  </span>
+                </label>
+              </div>
+
+              {config.monitoring.serviceMonitor?.enabled && (
+                <div className="form-grid three-columns">
+                  <div className="form-group">
+                    <label>
+                      Scrape Interval
+                      <HelpTooltip content="How often Prometheus scrapes metrics. Default: 10s. Lower values (5s) provide higher resolution but increase load. Higher values (30s) reduce load but lower resolution." />
+                    </label>
+                    <input
+                      type="text"
+                      value={config.monitoring.serviceMonitor.interval}
+                      onChange={(e) => handleChange('monitoring.serviceMonitor.interval', e.target.value)}
+                      placeholder="10s"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Scrape Timeout
+                      <HelpTooltip content="Maximum time to wait for metrics response. Must be less than scrape interval. Default: 10s." />
+                    </label>
+                    <input
+                      type="text"
+                      value={config.monitoring.serviceMonitor.scrapeTimeout}
+                      onChange={(e) => handleChange('monitoring.serviceMonitor.scrapeTimeout', e.target.value)}
+                      placeholder="10s"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Prometheus Release Name
+                      <HelpTooltip content="Helm release name of your Prometheus Operator installation. Must match for ServiceMonitor to be discovered. Default: kube-prometheus-stack." />
+                    </label>
+                    <input
+                      type="text"
+                      value={config.monitoring.serviceMonitor.prometheusRelease}
+                      onChange={(e) => handleChange('monitoring.serviceMonitor.prometheusRelease', e.target.value)}
+                      placeholder="kube-prometheus-stack"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Alerts Configuration */}
+              <h3>Prometheus Alerts</h3>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={config.monitoring.alerts?.enabled || false}
+                    onChange={(e) => {
+                      handleChange('monitoring.alerts', { enabled: e.target.checked });
+                    }}
+                  />
+                  <span>
+                    Enable PrometheusRule Alerts
+                    <HelpTooltip content="Deploys 15+ production-ready alerts: CRITICAL (NodeDown, NoPeers, SyncStalled, DiskSpaceCritical), WARNING (LowPeerCount, SyncLag, HighMemoryUsage, TxPoolOverload), PERFORMANCE (HighCPUUsage, HighIOWait, PredictDiskFull). Alerts integrate with Alertmanager for notifications." />
+                  </span>
+                </label>
+              </div>
+
+              {/* Dashboard Configuration */}
+              <h3>Grafana Dashboard</h3>
               <div className="form-group">
                 <label className="checkbox-label">
                   <input
@@ -662,10 +843,13 @@ export default function BscConfigContent({ nodeType }: BscConfigContentProps) {
                     checked={config.monitoring.grafanaDashboard}
                     onChange={(e) => handleChange('monitoring.grafanaDashboard', e.target.checked)}
                   />
-                  Include Grafana Dashboard
+                  <span>
+                    Include Grafana Dashboard ConfigMap
+                    <HelpTooltip content="Generates a pre-configured Grafana dashboard with 14 panels: Block Height, Node Status, Pending TX (stats); Block Number, TX/Block, Gas Usage, Block Size, TX Pool, Processing Time (blockchain metrics); CPU, Memory, Disk, Network (system metrics). Auto-imports if Grafana sidecar is enabled." />
+                  </span>
                 </label>
               </div>
-            </div>
+            </>
           )}
         </div>
 

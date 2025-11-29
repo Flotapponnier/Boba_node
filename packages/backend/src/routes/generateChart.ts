@@ -61,10 +61,10 @@ generateChartRouter.post('/generate/bsc', async (req, res) => {
 
     // Add monitoring templates if enabled
     if (config.monitoring?.enabled) {
-      archive.append(generateServiceMonitorYaml(), { name: `${chartName}/templates/servicemonitor.yaml` });
-      archive.append(generatePrometheusRuleYaml(), { name: `${chartName}/templates/prometheusrule.yaml` });
+      archive.append(generateServiceMonitorYaml('bsc'), { name: `${chartName}/templates/servicemonitor.yaml` });
+      archive.append(generatePrometheusRuleYaml('bsc', 'BSC'), { name: `${chartName}/templates/prometheusrule.yaml` });
       if (config.monitoring.grafanaDashboard) {
-        archive.append(generateGrafanaDashboardConfigMap(), { name: `${chartName}/templates/grafana-dashboard.yaml` });
+        archive.append(generateGrafanaDashboardConfigMap('bsc', 'BSC'), { name: `${chartName}/templates/grafana-dashboard.yaml` });
       }
     }
 
@@ -124,10 +124,10 @@ generateChartRouter.post('/generate/eth', async (req, res) => {
 
     // Add monitoring templates if enabled
     if (config.monitoring?.enabled) {
-      archive.append(generateServiceMonitorYaml(), { name: `${chartName}/templates/servicemonitor.yaml` });
-      archive.append(generatePrometheusRuleYaml(), { name: `${chartName}/templates/prometheusrule.yaml` });
+      archive.append(generateServiceMonitorYaml('ethereum'), { name: `${chartName}/templates/servicemonitor.yaml` });
+      archive.append(generatePrometheusRuleYaml('ethereum', 'Ethereum'), { name: `${chartName}/templates/prometheusrule.yaml` });
       if (config.monitoring.grafanaDashboard) {
-        archive.append(generateGrafanaDashboardConfigMap(), { name: `${chartName}/templates/grafana-dashboard.yaml` });
+        archive.append(generateGrafanaDashboardConfigMap('ethereum', 'Ethereum'), { name: `${chartName}/templates/grafana-dashboard.yaml` });
       }
     }
 
