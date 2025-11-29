@@ -1361,10 +1361,10 @@ export function generateGrafanaDashboardConfigMap(chain: string, chainName: stri
     weekStart: ""
   };
 
+  // Convert dashboard to JSON and escape {{ }} for Helm
   const dashboardJson = JSON.stringify(dashboard, null, 2)
-    // Escape {{ and }} for Helm templating - replace with Helm printf syntax
-    .replace(/\{\{/g, '{{ "{{" }}')
-    .replace(/\}\}/g, '{{ "}}" }}');
+    .split('{{').join('{{ "{{" }}')
+    .split('}}').join('{{ "}}" }}');
 
   return `{{- if and .Values.monitoring.enabled .Values.monitoring.grafana.dashboards.enabled }}
 apiVersion: v1
