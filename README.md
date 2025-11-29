@@ -54,29 +54,70 @@ The generated charts follow DevOps best practices and include everything you nee
 - **Validator Support**: Specialized configurations for validator nodes
 - **Snapshot Support**: Quick sync with snapshot downloads
 
-## Project Structure
+## Architecture
+
+Boba Node uses a **metadata-driven architecture** to eliminate code duplication and provide a consistent, maintainable codebase:
+
+### Metadata-Driven Configuration
+- **Chain Configuration System** (`chainConfig.ts`): Centralized metadata for all blockchain types
+  - Field definitions with types, labels, tooltips, and validation
+  - Chain-specific ports, defaults, and documentation links
+  - Dynamic form rendering based on metadata
+- **Shared Components**: Reusable sections powered by metadata (Basic, Image, Service, Node Config)
+- **Chain-Specific Sections**: Custom sections for unique features (Resources, Persistence, Snapshot, Monitoring, Validator)
+
+### Single Unified Page Architecture
+- **One Configuration Component** (`UnifiedConfigContent.tsx`) handles all chains
+- **Conditional Rendering**: Chain-specific sections loaded based on selection
+- **Type-Safe**: Full TypeScript integration with strong typing
+- **64% Code Reduction**: From 2400+ lines of duplicated code to 870 lines across modular files
+
+### Project Structure
 
 ```
 Boba_node/
 ├── packages/
-│   ├── backend/              # Express API for Helm chart generation
-│   │   └── src/
-│   └── frontend/             # React + TypeScript UI
+│   ├── backend/                      # Express API for Helm chart generation
+│   │   ├── src/
+│   │   │   ├── routes/              # API endpoints per chain
+│   │   │   ├── generators/          # Helm chart generation logic
+│   │   │   ├── presets/             # Node type presets (fast, full, archive, validator)
+│   │   │   └── defaults/            # Default configurations per chain
+│   │   └── helm-charts/             # Base Helm chart templates
+│   │
+│   └── frontend/                     # React + TypeScript UI
 │       └── src/
+│           ├── config/
+│           │   └── chainConfig.ts            # Metadata-driven configuration system
+│           │
 │           ├── components/
-│           │   ├── common/             # Reusable basic components
-│           │   ├── sections/           # Modular configuration sections
-│           │   │   ├── bsc/           # BSC-specific sections
-│           │   │   ├── eth/           # Ethereum-specific sections
-│           │   │   └── arb/           # Arbitrum-specific sections
-│           │   ├── HelpTooltip.tsx    # Context-aware tooltips
-│           │   ├── NodeTypeModal.tsx  # Node type selection
-│           │   └── SectionHeader.tsx  # Section headers with help
-│           ├── pages/                 # Main configuration pages
-│           ├── types/                 # TypeScript type definitions
-│           ├── hooks/                 # Custom React hooks
-│           ├── utils/                 # Helper functions
-│           └── assets/                # Images and static files
+│           │   ├── shared/                   # Metadata-powered shared components
+│           │   │   ├── DynamicField.tsx     # Universal form field renderer
+│           │   │   ├── BasicConfigSection.tsx
+│           │   │   ├── ImageConfigSection.tsx
+│           │   │   ├── ServiceConfigSection.tsx
+│           │   │   └── NodeConfigSection.tsx
+│           │   │
+│           │   ├── sections/                 # Chain-specific sections
+│           │   │   ├── bsc/                 # BSC: Resources, Persistence, Snapshot, Monitoring
+│           │   │   ├── eth/                 # ETH: Resources, Persistence, Snapshot, Monitoring, Validator
+│           │   │   └── arb/                 # ARB: Resources, Persistence, Snapshot, Monitoring, Validator
+│           │   │
+│           │   ├── HelpTooltip.tsx          # Context-aware tooltips
+│           │   ├── NodeTypeModal.tsx        # Node type selection modal
+│           │   ├── SectionHeader.tsx        # Section headers with help
+│           │   └── SuccessModal.tsx         # Chart generation success modal
+│           │
+│           ├── pages/
+│           │   ├── NewHomePage.tsx          # Main entry point with node selection
+│           │   └── UnifiedConfigContent.tsx # Single unified configuration page
+│           │
+│           ├── hooks/
+│           │   └── useChainConfig.ts        # Custom hook for config state management
+│           │
+│           ├── types/                       # TypeScript type definitions
+│           ├── utils/                       # Helper functions (nodeTypeHelpers, etc.)
+│           └── assets/                      # Images and static files
 ```
 
 ## Roadmap
